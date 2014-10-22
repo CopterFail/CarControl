@@ -1,0 +1,958 @@
+* {
+    margin: 0;
+    padding: 0;
+    border: 0;
+    list-style: none;
+}
+body {
+    font-family: sans-serif;
+    font-size: 12px;
+    color: #303030;
+    -webkit-text-size-adjust: 100%;
+    background-color: #dfddd0;
+}
+a {
+    color: #303030;
+    text-decoration: none;
+}
+a:hover {
+    text-decoration: underline;
+}
+.clear-both {
+    clear: both;
+}
+.left {
+    float: left;
+}
+.right {
+    float: right;
+}
+#main-wrapper {
+    width: 940px;
+    margin: 10px auto 0 auto;
+    
+    padding: 0 10px 0 10px;
+}
+#port-picker {
+    float: left;
+    
+    height: 22px;
+    margin-bottom: 10px;
+}
+    #port-picker li {
+        float: left;
+    }
+    #port-picker select {
+        height: 20px;
+        line-height: 20px;
+        
+        float: left;
+        margin-right: 10px;
+        
+        border: 1px solid silver;
+    }
+    #port-picker #port {
+        width: 120px;
+    }
+    #port-picker #baud {
+        width: 80px;
+    }
+    #port-picker #delay {
+        width: 60px;
+    }
+    #port-picker a {
+        float: left;
+        
+        display: block;
+        
+        width: 80px;
+        height: 18px;
+        border: 1px solid silver;
+        
+        line-height: 18px;
+        text-align: center;
+    }
+    #port-picker a.refresh {
+        margin-right: 10px;
+        
+        background-color: #5569d0;
+        color: white;
+    }
+        #port-picker a.refresh:hover {
+            text-decoration: none;
+            background-color: #424d84;
+        }
+    #port-picker a.connect {
+        margin-right: 10px;
+        
+        background-color: #be2222;
+        color: white;
+    }
+        #port-picker a.connect:hover {
+            text-decoration: none;
+            background-color: #ea3131;
+        }
+    #port-picker a.connect.active {
+        background-color: #0fab16;
+    }
+        #port-picker a.connect.active:hover {
+            background-color: #13d81d;
+        }       
+#sensor-status {
+    float: right;
+    
+    height: 22px;
+    line-height: 22px;
+}
+    #sensor-status li {
+        float: left;
+        
+        margin-left: 10px;
+        padding: 0 6px 0 6px;
+        
+        height: 18px;
+        line-height: 18px;
+        
+        color: white;
+        text-align: center;
+        
+        border: 1px solid #c0c0c0;
+        background-color: #be2222;
+    }
+    #sensor-status .on {
+        background-color: #0d8b13;
+    }
+#command-log {    
+    margin-bottom: 10px;
+    
+    height: 80px;
+    
+    border: 1px solid silver;
+    background-color: white;
+    
+    overflow-y: hidden;
+} 
+    #command-log .wrapper {
+        padding: 5px;
+    }
+#port-usage {
+    position: absolute;
+    
+    right: 11px;
+    margin-top: 1px;
+    
+    padding-top: 2px;
+    padding-right: 5px;
+    padding-left: 5px;
+    
+    width: 115px;
+    
+    line-height: 20px;
+    
+    border: 1px solid silver;
+    border-top: 0;
+    border-right: 0;
+    
+    background-color: #ededed;
+}
+    #port-usage span {
+        font-weight: bold;
+    }
+#tabs {
+    position: absolute;
+    margin-top: 1px;
+}
+    #tabs li {
+        float: left;
+        margin-right: 5px;
+        
+        border: 1px solid #848484;
+    }
+        #tabs li.first {
+        }
+        #tabs li.last {
+        }
+        #tabs li.active {
+            border-bottom: 1px solid white;
+        }
+            #tabs li.active a {
+                background-color: white;            
+            }
+            #tabs li.active a:hover {
+                background-color: white;
+                cursor: default;
+            }
+        #tabs li a {
+            display: block;
+            
+            height: 15px;
+            
+            padding: 5px;
+            padding-left: 12px;
+            padding-right: 12px;
+            
+            background-color: #d0d0d0;
+        }
+        #tabs li a:hover {
+            text-decoration: none;
+            background-color: #acacac;
+        }
+#content {
+    margin-top: 37px;
+    
+    padding: 10px;
+    
+    background-color: white;
+    height: 355px;
+    
+    border: 1px solid #848484;
+    
+    overflow-y: auto;
+    overflow-x: hidden;
+}  
+/* Flotr related styles */
+.flotr-legend {
+    padding: 2px;
+    left: 31px;
+    top: 20px;
+    border: 0;
+    
+    background-color: white;
+}
+  
+/* tab section */
+.tab-initial_setup {
+}
+    .tab-initial_setup .calibrateESC {
+        float: left;
+        display: block;
+        
+        margin-top: 8px;
+        
+        width: 160px;
+        height: 23px;
+        line-height: 23px;
+        
+        text-align: center;
+        color: white;
+        
+        background-color: #5569d0;
+        border: 1px solid silver;
+    }
+    .tab-initial_setup .calibrateESC:hover {
+        text-decoration: none;
+        background-color: #424d84;
+    }
+    .tab-initial_setup .calibrateAccel {
+        display: block;
+        
+        width: 160px;
+        height: 23px;
+        line-height: 23px;
+        
+        text-align: center;
+        color: white;
+        
+        background-color: #5569d0;
+        border: 1px solid silver;
+    }   
+    .tab-initial_setup .calibrateAccel:hover {
+        text-decoration: none;
+        background-color: #424d84;
+    }
+    .tab-initial_setup .titles {
+        margin-top: 5px;
+        height: 20px;
+    }
+        .tab-initial_setup .titles li {
+            float: left;
+            width: 54px;
+            
+            text-align: center;
+            font-weight: bold;
+        }
+    .tab-initial_setup .calibrateAccelManual {
+        height: 20px;
+    }
+        .tab-initial_setup .calibrateAccelManual li {
+            float: left;
+            margin-right: 3px;
+        }
+        .tab-initial_setup .calibrateAccelManual .last {
+            margin-right: 0px;
+        }
+        .tab-initial_setup .calibrateAccelManual input {
+            width: 50px;
+            height: 18px;
+            line-height: 18px;
+            
+            text-align: center;
+            
+            border: 1px solid silver;
+        }
+    .tab-initial_setup .calibrateAccelManualUpdate {
+        display: block;
+        
+        margin-top: 5px;
+        
+        width: 160px;
+        height: 23px;
+        line-height: 23px;
+        
+        text-align: center;
+        color: white;
+        
+        background-color: #2e386d;
+        border: 1px solid silver;        
+    }
+    .tab-initial_setup .calibrateAccelManualUpdate:hover {
+        text-decoration: none;
+        background-color: #0c0f1d;        
+    }
+    .tab-initial_setup .minimumThrottle input {
+        float: left;
+        
+        margin-top: 10px;
+        
+        width: 84px;
+        height: 18px;
+        
+        padding-right: 5px;
+        
+        text-align: right;
+        margin-right: 10px;
+        
+        line-height: 18px;
+        border: 1px solid silver;
+    }
+    .tab-initial_setup .minimumThrottleUpdate {
+        float: left;
+        display: block;
+        
+        margin-top: 10px;
+        
+        width: 60px;
+        height: 18px;
+        line-height: 18px;
+        
+        text-align: center;
+        color: white;
+        
+        border: 1px solid silver;
+        
+        background-color: #078814;
+    }
+    .tab-initial_setup .minimumThrottleUpdate:hover {
+        text-decoration: none;
+        background-color: #13b723;
+    }    
+    .tab-initial_setup .initializeEEPROM {
+        float: left;
+        display: block;
+        
+        margin-top: 15px;
+        
+        width: 160px;
+        height: 23px;
+        line-height: 23px;
+        
+        text-align: center;
+        color: white;
+        
+        background-color: #be2222;
+        border: 1px solid silver;
+    }
+    .tab-initial_setup .initializeEEPROM:hover {
+        text-decoration: none;
+        background-color: #ea3131;
+    }
+    .tab-initial_setup p {
+        margin-left: 170px;
+        margin-bottom: 10px;
+        
+        padding: 5px;
+        
+        border: 1px dotted silver;
+    }
+    .tab-initial_setup .backup {
+        display: block;
+        
+        width: 160px;
+        height: 23px;
+        line-height: 23px;
+        
+        text-align: center;
+        color: white;
+        
+        background-color: #5569d0;
+        border: 1px solid silver;
+    }
+    .tab-initial_setup .backup:hover {
+        text-decoration: none;
+        background-color: #424d84; 
+    }
+    .tab-initial_setup .restore {
+        display: block;
+        
+        margin-top: 5px;
+        
+        width: 160px;
+        height: 23px;
+        line-height: 23px;
+        
+        text-align: center;
+        color: white;
+        
+        background-color: #5569d0;
+        border: 1px solid silver;
+    }
+    .tab-initial_setup .restore:hover {
+        text-decoration: none;
+        background-color: #424d84;
+    }
+table.pid_tuning {
+    width: 100%;
+    border-collapse: collapse;    
+}
+    table.pid_tuning, table.pid_tuning th, table.pid_tuning td {
+        padding: 5px;
+        border: 1px solid #8b8b8b;
+    }
+    table.pid_tuning tr:nth-child(odd) {
+        background-color: #ececec;
+    }    
+    table.pid_tuning input {
+        width: 130px;
+        height: 18px;
+        line-height: 18px;
+        
+        padding: 0 5px 0 5px;
+        border: 1px solid silver;
+        text-align: right;
+    }
+    table.pid_tuning a.update {
+        display: block;
+        
+        width: 60px;
+        height: 18px;
+        line-height: 18px;
+        
+        color: white;
+        text-align: center;
+        
+        border: 1px solid silver;
+        background-color: #078814;
+    }
+    table.pid_tuning a.update:hover {
+        text-decoration: none;
+        background-color: #13b723;
+    }
+table.channel_assigner {
+    width: 100%;
+    border-collapse:collapse;  
+}
+    table.channel_assigner, table.channel_assigner  th, table.channel_assigner td {
+        padding: 5px;
+        border: 1px solid #8b8b8b;    
+    }
+    table.channel_assigner tr:nth-child(odd) {
+        background-color: #ececec;
+    }
+    table.channel_assigner input {
+        width: 130px;
+        height: 18px;
+        line-height: 18px;
+        
+        padding: 0 5px 0 5px;
+        border: 1px solid silver;
+        text-align: right;
+    }    
+    table.channel_assigner  a.update {
+        display: block;
+        
+        width: 60px;
+        height: 18px;
+        line-height: 18px;
+        
+        color: white;
+        text-align: center;
+        
+        border: 1px solid silver;
+        background-color: #078814;
+    }
+    table.channel_assigner  a.update:hover {
+        text-decoration: none;
+        background-color: #13b723;
+    }
+.tab-function_triggers {
+}
+    .tab-function_triggers .heads li {
+        float: left;
+        
+        width: 62px;
+        height: 22px;
+        line-height: 22px;
+        
+        text-align: center;
+        font-weight: bold;
+        
+        border: 1px solid #8b8b8b;
+        border-bottom: 0;
+        border-left: 0;
+        
+        background-color: #ececec;
+    }
+        .tab-function_triggers .heads li:first-child {
+            margin-left: 162px;
+            border-left: 1px solid #8b8b8b;
+        }
+    .tab-function_triggers .functions {
+        width: 100%;
+        border-collapse: collapse;    
+    }
+        .tab-function_triggers .functions th, .tab-function_triggers .functions td {
+            width: 20px;
+            line-height: 22px;
+            text-align: center;
+            
+            border: 1px solid #8b8b8b;
+        }
+        .tab-function_triggers .functions .name {
+            text-align: center;
+        }
+        .tab-function_triggers .functions td input {
+            position: absolute;
+            
+            margin-top: -6px;
+            margin-left: -6px;          
+        }
+        .tab-function_triggers .functions .on {
+            background-color: #fc944f;
+        } 
+    .tab-function_triggers .update {
+        display: block;
+        float: right;
+        
+        margin-top: 10px;
+        
+        width: 120px;
+        height: 30px;
+        line-height: 30px;
+        
+        font-size: 14px;
+        color: white;
+        text-align: center;
+        
+        border: 1px solid silver;
+        
+        background-color: #078814;
+    }
+    .tab-function_triggers .update:hover {
+        background-color: #13b723;
+        text-decoration: none;
+    }
+    .tab-function_triggers p {
+        margin-top: 10px;
+        padding: 5px;
+        
+        line-height: 16px;
+        
+        border: 1px dotted silver;
+    } 
+.tab-sensor_mapping {
+}
+    .tab-sensor_mapping .sensor {
+        float: left;
+        
+        margin-right: 20px;
+    }
+    .tab-sensor_mapping .sensor > span {
+        display: block;
+        
+        width: 230px;
+        height: 20px;
+        line-height: 20px;
+        
+        text-align: center;
+        
+        font-weight: bold;
+    }
+    .tab-sensor_mapping table {
+        border-collapse: collapse; 
+        text-align: center;
+    }
+    .tab-sensor_mapping table, .tab-sensor_mapping table th, .tab-sensor_mapping table td {
+        padding: 5px;
+        border: 1px solid #8b8b8b;
+    }
+    .tab-sensor_mapping table th {
+        background-color: #ececec;
+    } 
+    .tab-sensor_mapping table input {
+        position: absolute;
+        margin-top: -6px;
+        margin-left: -6px;
+    }
+    .tab-sensor_mapping a.restore {
+        float: left;
+        display: block;
+        
+        margin-top: 35px;
+        margin-left: 30px;
+        
+        width: 80px;
+        height: 30px;
+        line-height: 30px;
+        
+        text-align: center;
+        color: white;
+        
+        background-color: #5569d0;
+        border: 1px solid silver;
+    }
+    .tab-sensor_mapping a.restore:hover {
+        text-decoration: none;
+        background-color: #424d84; 
+    }    
+    .tab-sensor_mapping a.update {
+        float: left;
+        display: block;
+        
+        margin-top: 10px;
+        margin-left: 30px;
+        
+        width: 80px;
+        height: 30px;
+        line-height: 30px;
+        
+        color: white;
+        text-align: center;
+        
+        border: 1px solid silver;
+        background-color: #078814;
+    }
+    .tab-sensor_mapping a.update:hover {
+        text-decoration: none;
+        background-color: #13b723; 
+    }
+    .tab-sensor_mapping p {
+        margin-top: 10px;
+        margin-bottom: 10px;
+        
+        padding: 5px;
+        
+        border: 1px dotted silver;
+    }
+    
+.sensor_data #graph_gyro {
+    width: 900px;
+    height: 175px;
+} 
+.sensor_data #graph_accel {
+    width: 900px;
+    height: 175px;
+}
+.sensor_data #graph_mag {
+    width: 900px;
+    height: 175px;
+}
+.sensor_data #graph_baro {
+    width: 900px;
+    height: 175px;
+}   
+#graph_receiver {
+    width: 900px;
+    height: 355px;
+}
+#interactive_block {
+    height: 350px;
+    width: 916px;
+    
+    border: 1px solid silver;
+    background-color: white;
+}
+    #interactive_block a.reset {
+        position: relative;
+        display: block;
+        
+        top: 315px;
+        left: 10px;
+        
+        width: 100px;
+        height: 23px;
+        line-height: 23px;
+        
+        color: white;
+        text-align: center;
+        
+        border: 1px solid silver;
+        background-color: blue;
+    } 
+    #interactive_block a.reset:hover {
+        text-decoration: none;
+    }
+    #perspective {
+        -webkit-perspective: 800;
+        -webkit-perspective-origin: 50% 150px; /* 150px = (350px / 2) - 25px */
+    }  
+        #cube {
+            position: relative;
+            top: 140px;
+            left: 408px; /* (916px / 2) - 50px */
+            
+            height: 100px;
+            width: 100px;
+            
+            -webkit-transform-style: preserve-3d;
+        }
+            #cubePITCH {
+                -webkit-transform-style: preserve-3d;
+            }
+            #cubeROLL {
+                -webkit-transform-style: preserve-3d;
+            }
+            #cube .face {
+                position: absolute;
+                
+                color: white;
+                font-size: 25px;
+                text-align: center;
+            }
+            #cube .face.one  {
+                width: 100px;
+                height: 200px;
+                line-height: 200px;
+
+                -webkit-transform: rotateX(-90deg) translateZ(-50px);
+                background-color: purple;
+            }
+            #cube .face.two {
+                width: 100px;
+                height: 50px;
+                line-height: 50px;
+                
+                -webkit-transform: translateZ(100px);
+                background-color: blue;
+            }
+            #cube .face.three {
+                width: 200px;
+                height: 50px;
+                line-height: 50px;
+                
+                -webkit-transform: rotateY(90deg);
+                background-color: green;
+            }
+            #cube .face.four {
+                width: 100px;
+                height: 50px;
+                line-height: 50px;
+                
+                -webkit-transform: rotateY(180deg) translateZ(100px);
+                background-color: black;
+            }
+            #cube .face.five {
+                width: 200px;
+                height: 50px;
+                line-height: 50px;
+                
+                -webkit-transform: rotateY(-90deg) translateZ(100px);
+                background-color: red;
+            }
+            #cube .face.six {
+                width: 100px;
+                height: 200px;
+                line-height: 200px;
+                
+                -webkit-transform: rotateX(90deg) translateZ(100px);
+                background-color: silver;
+            }
+.tab-motor_output {
+}
+    .tab-motor_output .bar_wrapper {
+    
+    }
+    .tab-motor_output .titles {
+        width: 100%;
+        height: 20px;
+    }
+        .tab-motor_output .titles li {
+            float: left;
+            width: 62px;
+            margin-right: 10px;
+            
+            text-align: center;
+        }
+        .tab-motor_output .titles .active {
+            color: green;
+        }
+    .tab-motor_output .m-block {
+        float: left;
+        
+        width: 60px;
+        height: 130px;
+        
+        margin-right: 10px;
+        
+        border: 1px solid silver;
+        background-color: #e9e9e9;
+    }
+    .tab-motor_output .indicator {
+        position: absolute;
+        margin-top: 130px;
+        
+        width: 60px;
+        height: 0px;
+    }
+    .tab-motor_output .sliders {
+        margin-top: 15px;
+        margin-left: -30px;
+    }
+        .tab-motor_output .sliders li {
+            margin-top: 10px;
+            float: left;
+            width: 72px;
+        }
+    .tab-motor_output input {
+        height: 130px;
+        -webkit-appearance: slider-vertical;
+    }
+    .tab-motor_output .values {
+        height: 20px;
+        margin-left: 3px;
+    }
+        .tab-motor_output .values li {
+            float: left;
+            width: 62px;
+            margin-right: 10px;
+            
+            text-align: center;        
+        }
+    .tab-motor_output .stop {
+        top: 370px;
+        left: 690px;
+        
+        display: block;
+        position: absolute;
+        
+        width: 160px;
+        height: 100px;
+        
+        text-align: center;
+        line-height: 100px;
+        
+        font-size: 16px;
+        font-weight: bold;
+        
+        border: 1px solid #848484;
+        background-color: #d0d0d0;
+    }
+    .tab-motor_output .stop:hover {
+        background-color: #ff0000;
+        text-decoration: none;
+    }
+.tab-gps {
+}
+    .tab-gps .gps-info, .tab-gps .gps-compass {
+        float: left;
+        
+        width: 160px;
+        height: 160px;
+        
+        border: 1px solid #8b8b8b;
+    }
+        .tab-gps .gps-info .head, .tab-gps .gps-compass .head {
+            height: 25px;
+            line-height: 25px;
+            
+            text-align: center;
+            font-weight: bold;
+            
+            background-color: #ececec;
+            border-bottom: 1px solid #8b8b8b;
+        }
+        .tab-gps .gps-info dl {
+            padding: 5px;
+        }
+        .tab-gps .gps-info dt {
+            float: left;
+            width: 65px;
+        }
+        .tab-gps .gps-info dd {
+            margin-left: 65px;
+        }
+    .tab-gps .gps-compass {
+        margin-left: 10px;
+    }
+        .tab-gps .gps-compass .compass {
+            margin: auto;
+            margin-top: 2px;
+            
+            width: 128px;
+            height: 128px;
+            
+            border: 1px dashed silver;
+            border-radius: 50%;
+        }
+            .tab-gps .gps-compass .compass span {
+                position: relative;
+                font-weight: bold;
+            }
+            .tab-gps .gps-compass .compass span:nth-child(1) {
+                top: 5px;            
+                left: 60px; 
+            } 
+            .tab-gps .gps-compass .compass span:nth-child(2) {
+                top: 60px;
+                left: 105px;
+            }
+            .tab-gps .gps-compass .compass span:nth-child(3) {
+                top: 110px;
+                left: 40px; 
+            }
+            .tab-gps .gps-compass .compass span:nth-child(4) {
+                top: 60px;
+                left: -25px;
+            }
+                .tab-gps .gps-compass .compass .pointer {
+                    position: absolute;
+                    
+                    margin-top: -14px;
+                    
+                    width: 128px;
+                    height: 128px;
+                    
+                    -webkit-transform: rotate(0deg); 
+                }
+                    .tab-gps .gps-compass .compass .pointer .tip {
+                        position: absolute;
+                        
+                        margin-top: 15px;
+                        margin-left: -6px;
+                        
+                        width: 0; 
+                        height: 0; 
+                        
+                        border-left: 10px solid transparent;
+                        border-right: 10px solid transparent;
+                        
+                        border-bottom: 30px solid red;  
+                    }
+                    .tab-gps .gps-compass .compass .pointer .stick {
+                        display: block;
+                        position: absolute;
+                        
+                        left: 62px;
+                        top: 49px;
+                        
+                        width: 4px;
+                        height: 20px;
+                        
+                        background-color: black;
+                    }
+.tab-about .supporters {
+    height: 200px;
+    
+    line-height: 18px;
+    text-align: center;
+    font-weight: bold;
+}

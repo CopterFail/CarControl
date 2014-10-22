@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Phoenix Configurator</title>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <meta name="author" content="cTn" />
+        <link type="text/css" rel="stylesheet" href="./css/style.css" media="all" /> 
+        <script type="text/javascript" src="./js/jquery-2.0.2.min.js"></script>
+        <script type="text/javascript" src="./js/flotr2.min.js"></script>
+        <script type="text/javascript" src="./js/data_storage.js"></script>
+        <script type="text/javascript" src="./js/serial_backend.js"></script> 
+        <script type="text/javascript" src="./js/union_process.js"></script>
+        <script type="text/javascript" src="./js/file_system.js"></script>
+        <script type="text/javascript" src="./js/main.js"></script> 
+        
+        <!-- Various tabs are divided into separate files (for clarity) --> 
+        <script type="text/javascript" src="./tabs/initial_setup.js"></script>
+        <script type="text/javascript" src="./tabs/pid_tuning.js"></script>
+        <script type="text/javascript" src="./tabs/channel_assigner.js"></script>
+        <script type="text/javascript" src="./tabs/function_triggers.js"></script>
+        <script type="text/javascript" src="./tabs/sensor_mapping.js"></script>
+        <script type="text/javascript" src="./tabs/sensor_data.js"></script>
+        <script type="text/javascript" src="./tabs/rx.js"></script>  
+        <script type="text/javascript" src="./tabs/vehicle_view.js"></script>  
+        <script type="text/javascript" src="./tabs/motor_output.js"></script>
+        <script type="text/javascript" src="./tabs/gps.js"></script>
+    </head>
+    <body>
+        <div id="main-wrapper">
+            <div id="port-picker">
+                <ul>
+                    <li class="port">
+                        <select id="port" title="Port">
+                            <!-- port list gets generated here -->
+                        </select>
+                    </li>
+                    <li>
+                        <select id="baud" title="Baud Rate">
+                            <option value="115200">115200</option>
+                            <option value="57600">57600</option>
+                            <option value="38400" selected="selected">38400</option>
+                            <option value="28800">28800</option>
+                            <option value="19200">19200</option>
+                            <option value="14400">14400</option>
+                            <option value="9600">9600</option>
+                            <option value="4800">4800</option>
+                            <option value="2400">2400</option>
+                            <option value="1200">1200</option>
+                            <option value="300">300</option>
+                        </select>
+                    </li>
+                    <li>
+                        <select id="delay" title="Timeout">
+                            <option value="0">0</option>
+                            <option value="1">1</option>
+                            <option value="2">2</option>
+                            <option value="3">3</option>
+                            <option value="4">4</option>
+                            <option value="5">5</option>
+                            <option value="6">6</option>
+                            <option value="7">7</option>
+                            <option value="8">8</option>
+                            <option value="9">9</option>
+                            <option value="10">10</option>
+                        </select>
+                    </li>
+                    <li>
+                        <a class="connect" href="#" title="">Connect</a>
+                        <a class="refresh" href="#" title="">Refresh</a>                        
+                    </li>
+                </ul>  
+            </div>
+            <div id="sensor-status">
+                <ul>
+                    <li class="gyro">Gyroscope</li>
+                    <li class="accel">Accelerometer</li>
+                    <li class="mag">Magnetometer</li>
+                    <li class="baro">Barometer</li>
+                    <li class="gps">GPS</li>
+                </ul>
+            </div>
+            <div class="clear-both"></div>
+            <div id="port-usage">
+                Port utilization: <span class="port-usage">0 %</span>
+            </div>
+            <div id="command-log">
+                <div class="wrapper">
+                </div>
+            </div>
+            <div class="clear-both"></div>
+            <div id="tabs">
+                <ul>
+                    <li class="first tab_initial_setup"><a href="#" title="">Init. Setup</a></li>
+                    <li class="tab_pid_tuning"><a href="#" title="">PID</a></li>
+                    <li class="tab_channel_assigner"><a href="#" title="">Channel Assigner</a></li>
+                    <li class="tab_function_triggers"><a href="#" title="">AUX</a></li>
+                    <li class="tab_tx_rx"><a href="#" title="">RX Data</a></li>
+                    <li class="tab_sensor_mapping"><a href="#" title="">Sensor Mapping</a></li>
+                    <li class="tab_sensor_data"><a href="#" title="">Sensor Data</a></li>
+                    <li class="tab_vehicle_view"><a href="#" title="">Vehicle View</a></li>
+                    <li class="tab_motor_output"><a href="#" title="">Motors</a></li>
+                    <li class="tab_gps"><a href="#" title="">GPS</a></li>
+                    <li class="last tab_about"><a href="#" title="">About</a></li>
+                </ul>
+                <div class="clear-both"></div>
+            </div>            
+            <div id="content">
+            </div>
+        </div>
+    </body>
+</html>            
