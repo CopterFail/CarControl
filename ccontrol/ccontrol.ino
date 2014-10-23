@@ -59,7 +59,9 @@
     #include <BatteryMonitor_current.h>
     
     // Receiver
-    #include <Receiver_teensy3_HW_PPM.h>
+    //#include <Receiver_teensy3_HW_PPM.h>
+    #include <Receiver_teensy3_HW_SUMD.h>
+
     
     // Motor / ESC / servo
     #include <ESC_teensy3_HW3.h>     
@@ -195,7 +197,11 @@ void process100HzTask() {
 
 void process50HzTask() {
     int16_t servo;
-  
+    
+#ifdef SUMD_IS_ACTIVE  
+    ReceiverReadPacket(); // dab 2014-02-01: non interrupt controlled receiver reading  
+#endif
+
     processPilotCommands();
     updateModell_50Hz();
 
@@ -211,6 +217,8 @@ void process50HzTask() {
     
     //if( (dz<10) && (dz>-10) ) dz = 0;
     MotorOut[2] = (uint16_t)(1500 + servo);
+    MotorOut[3] = TX_yaw;
+    MotorOut[0] = TX_throttle;
     updateMotors();
     
     LED_50Hz();
@@ -219,6 +227,7 @@ void process50HzTask() {
 void process10HzTask() {
     // Trigger RX failsafe function every 100ms
     RX_failSafe();
+    //if(failsafeEnabled) ..
     
 #ifdef Magnetometer
     sensors.readMag();

@@ -33,14 +33,17 @@ $(document).ready(function() {
         console.log("Available port list requested.");
         port_picker.html('');
 
-        chrome.serial.getPorts(function(ports) {
+        chrome.serial.getDevices(function(ports) {
             if (ports.length > 0) {
                 // Port list received
                 
                 ports.forEach(function(port) {
+//console.log(port.path);
                     $(port_picker).append($("<option/>", {
-                        value: port,
-                        text: port
+//                        value: port,
+//                        text: port
+                        value: port.path,
+                        text: port.path
                     }));        
                 });
                 
@@ -78,10 +81,11 @@ $(document).ready(function() {
         
         if (selected_port != '0') {
             if (clicks) { // odd number of clicks
-                chrome.serial.close(connectionId, onClosed);
+//                chrome.serial.close(connectionId, onClosed);
+                chrome.serial.disconnect(connectionId, onClosed);
                 
                 clearTimeout(connection_delay);
-                clearInterval(serial_poll);
+//                clearInterval(serial_poll);
                 clearInterval(port_usage_poll);
                 // Disable any active "data pulling" timer
                 disable_timers();
@@ -94,7 +98,8 @@ $(document).ready(function() {
             } else { // even number of clicks        
                 console.log('Connecting to: ' + selected_port);
                 
-                chrome.serial.open(selected_port, {
+//                chrome.serial.open(selected_port, {
+                chrome.serial.connect(selected_port, {
                     bitrate: selected_baud
                 }, onOpen);
                 
@@ -195,7 +200,8 @@ function onOpen(openInfo) {
         
         connection_delay = setTimeout(function() {
             // start polling
-            serial_poll = setInterval(readPoll, 10);
+//            serial_poll = setInterval(readPoll, 10);
+            chrome.serial.onReceive.addListener(onCharRead);
             port_usage_poll = setInterval(port_usage, 1000);
             
             // request configuration data (so we have something to work with)
@@ -232,7 +238,7 @@ function onClosed(result) {
             command_log('Connection closed -- <span style="color: red;">ERROR</span>');
         }
     }    
-};
+}
 
 function readPoll() {
     chrome.serial.read(connectionId, 64, onCharRead);

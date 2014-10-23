@@ -20,13 +20,13 @@ var PSP = {
     PSP_SET_MAG_CALIBRATION:   104,
     PSP_SET_MOTOR_TEST_VALUE:  105,
     
-    PSP_INF_ACK:      201,
-    PSP_INF_REFUSED:  202,
-    PSP_INF_CRC_FAIL: 203
+    PSP_INF_ACK:       201,
+    PSP_INF_REFUSED:   202,
+    PSP_INF_CRC_FAIL:  203,
+    PSP_INF_DATA_TOO_LONG: 204
 };
 
 var packet_state = 0;
-var command_buffer = new Array();
 var command;
 
 var message_length_expected = 0;
@@ -37,9 +37,12 @@ var message_crc = 0;
 var char_counter = 0;
 
 function onCharRead(readInfo) {
-    if (readInfo && readInfo.bytesRead > 0 && readInfo.data) {
+console.log("Read: " + readInfo.data.byteLength + " bytes");
+
+//    if (readInfo && readInfo.bytesRead > 0) {
+    if (readInfo && readInfo.data.byteLength > 0) {
         var data = new Uint8Array(readInfo.data);
-        
+      
         for (var i = 0; i < data.length; i++) {
             switch (packet_state) {
                 case 0:
@@ -142,16 +145,26 @@ function send_message(code, data, callback) {
         bufView[6] = bufView[2] ^ bufView[3] ^ bufView[4] ^ bufView[5]; // crc        
     }
     
-    chrome.serial.write(connectionId, bufferOut, function(writeInfo) {
-        if (writeInfo.bytesWritten > 0) {
+//    chrome.serial.write(connectionId, bufferOut, function(writeInfo) {
+//        if (writeInfo.bytesWritten > 0) {
+//            if (typeof callback !== 'undefined') {
+//                callback();
+//            }
+//        }
+//        // for debugging purposes
+//        // console.log("Wrote: " + writeInfo.bytesWritten + " bytes");
+//    });
+
+    chrome.serial.send(connectionId, bufferOut, function(writeInfo) {
+        if (writeInfo.bytesSend > 0) {
             if (typeof callback !== 'undefined') {
                 callback();
             }
         }
-        
         // for debugging purposes
-        // console.log("Wrote: " + writeInfo.bytesWritten + " bytes");
-    });    
+        console.log("Wrote: " + writeInfo.bytesSent + " bytes");
+    });
+    
 }
 
 function process_data(command, message_buffer) {
@@ -279,6 +292,9 @@ function process_data(command, message_buffer) {
             break;
         case PSP.PSP_INF_CRC_FAIL:
             console.log('crc check failed, code: ' + message_buffer_uint8_view[0] + ' crc value: ' + message_buffer_uint8_view[1]);
+            break;
+        case PSP.PSP_INF_DATA_TOO_LONG:
+            console.log('Flight Controller - Message too long (shorter the message or increase buffer size) !!!');
             break;
         default:
             console.log('Unknown command: ' + command);
