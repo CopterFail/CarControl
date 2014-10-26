@@ -115,51 +115,34 @@ void LED_10Hz( void )
 
 #endif
 
-// A multi color LED Stripe take 20 x 40us = 0.8ms time to update, no interrupts (only used by sonar)
-// LED-Stripe: MultiColor(5V, Status, 1Hz?)
+// A multi color LED Stripe take 5 x 40us = 0.2ms time to update
+// LED-Stripe: MultiColor WS2812B 5V
 #ifdef LED_STATUS
 
 
-    if( TX_pitch >= 1500 )
-    {
-       status = RED_LT;
-    }
-    else
-    {
-      
-      status = RED;
-      //status = WHITE; 
-    }
-    
     switch( iCarMode )
     {
       case MODE_BREAK:
         status = RED;
-        if( TX_pitch >= 1500 ) iCarMode = MODE_NEUTRAL;
         break;
       case MODE_BACKWARD:
         status = WHITE;
-        if( TX_pitch >= 1500 ) iCarMode = MODE_NEUTRAL;
         break;
       case MODE_NEUTRAL:
         status = RED_LT;
-        if( TX_pitch >= 1510 ) iCarMode = MODE_NORMAL;
-        if( TX_pitch <= 1490 ) iCarMode = MODE_BACKWARD;
         break;
       case MODE_NORMAL:
       default:
         status = RED_LT;
-        if( ( TX_pitch > 1490 ) && ( TX_pitch < 1510 ) ) iCarMode = MODE_NEUTRAL;
-        if( TX_pitch <= 1490 ) iCarMode = MODE_BREAK;
         break;
     }
       
-    for( i=0; i<4; i++ )
+    for( i=0; i<5; i++ )
     {
     	strip.setPixelColor(i,    status);
     	//strip.setPixelColor(i+5,  status);
     }
-    strip.show();	// this will take 700us with interrupts disabled!
+    strip.show();	// this will take some time
     
 #endif
 

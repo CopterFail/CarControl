@@ -219,7 +219,7 @@ void process50HzTask() {
     MotorOut[2] = (uint16_t)(1500 + servo);
     MotorOut[2] = TX_roll;
     MotorOut[3] = TX_yaw;
-    MotorOut[1] = 1500;
+    MotorOut[1] = 1500; // not used
     MotorOut[0] = TX_pitch;
     updateMotors();
     
@@ -245,6 +245,7 @@ void process10HzTask() {
     Serial.println(itterations);
 #endif
 
+    updateModell_10Hz();
     LED_10Hz();
     
     // Reset Itterations
