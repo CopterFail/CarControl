@@ -217,8 +217,10 @@ void process50HzTask() {
     
     //if( (dz<10) && (dz>-10) ) dz = 0;
     MotorOut[2] = (uint16_t)(1500 + servo);
+    MotorOut[2] = TX_roll;
     MotorOut[3] = TX_yaw;
-    MotorOut[0] = TX_throttle;
+    MotorOut[1] = 1500;
+    MotorOut[0] = TX_pitch;
     updateMotors();
     
     LED_50Hz();

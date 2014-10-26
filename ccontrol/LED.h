@@ -10,13 +10,13 @@
 
 
 #define LED_STATUS_COUNT	10
-#define LED_STATUS_MAX 		30
+#define LED_STATUS_MAX 		255
 
 
 #ifdef LED_STATUS
 
 #define RED		strip.Color(LED_STATUS_MAX, 0,              0)
-#define RED_LT		strip.Color(LED_STATUS_MAX>>2, 0,              0)
+#define RED_LT		strip.Color(LED_STATUS_MAX>>3, 0,              0)
 #define GREEN	strip.Color(0,              LED_STATUS_MAX, 0)
 #define BLUE	strip.Color(0,              0,              LED_STATUS_MAX)
 #define WHITE	strip.Color(LED_STATUS_MAX, LED_STATUS_MAX, LED_STATUS_MAX)
@@ -119,27 +119,50 @@ void LED_10Hz( void )
 // LED-Stripe: MultiColor(5V, Status, 1Hz?)
 #ifdef LED_STATUS
 
-    status = RED_LT;
-    if( ( mod_a < -0.1 ) && ( mod_v > 0.0) ) status = RED;
-    if( mod_v < 0 ) status = WHITE; 
+
+    if( TX_pitch >= 1500 )
+    {
+       status = RED_LT;
+    }
+    else
+    {
+      
+      status = RED;
+      //status = WHITE; 
+    }
     
+    switch( iCarMode )
+    {
+      case MODE_BREAK:
+        status = RED;
+        if( TX_pitch >= 1500 ) iCarMode = MODE_NEUTRAL;
+        break;
+      case MODE_BACKWARD:
+        status = WHITE;
+        if( TX_pitch >= 1500 ) iCarMode = MODE_NEUTRAL;
+        break;
+      case MODE_NEUTRAL:
+        status = RED_LT;
+        if( TX_pitch >= 1510 ) iCarMode = MODE_NORMAL;
+        if( TX_pitch <= 1490 ) iCarMode = MODE_BACKWARD;
+        break;
+      case MODE_NORMAL:
+      default:
+        status = RED_LT;
+        if( ( TX_pitch > 1490 ) && ( TX_pitch < 1510 ) ) iCarMode = MODE_NEUTRAL;
+        if( TX_pitch <= 1490 ) iCarMode = MODE_BREAK;
+        break;
+    }
+      
     for( i=0; i<4; i++ )
     {
     	strip.setPixelColor(i,    status);
-    	strip.setPixelColor(i+5,  status);
+    	//strip.setPixelColor(i+5,  status);
     }
     strip.show();	// this will take 700us with interrupts disabled!
     
 #endif
 
-#ifdef LED_STATUS_TEST
-    status = ((uint32_t)throttle - 1000) / 50;
-   	for( i=0; i<20; i++ )
-    {
-    	strip.setPixelColor(i,(status>=i)?GREEN:BLUE);
-    }
-   	strip.show();	// this will take 700us with interrupts disabled!
-#endif
 
 // LED-Stripe: Red(12V), White(12V)
     if (armed) {

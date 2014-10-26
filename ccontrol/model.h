@@ -10,6 +10,7 @@ void InitModell( void )
 	mod_ang = 0.0;
 	mod_dang = 0.0;
 	
+        
 }
 
 void updateModell_50Hz( void )

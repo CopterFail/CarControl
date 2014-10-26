@@ -27,6 +27,12 @@ bool armed = false;
 #define OFF 0
 #define ON 1
 
+// Car Mode definitions
+#define MODE_NEUTRAL 1
+#define MODE_NORMAL  2
+#define MODE_BREAK   3
+#define MODE_BACKWARD 4
+
 // Blinking LED to indicate activity
 bool Arduino_LED_state = 0;
 uint8_t Beacon_LED_state = 0;
@@ -39,6 +45,7 @@ uint8_t Beacon_LED_state = 0;
 // Kinematics variable definitions
 float kinematicsAngle[3];
 float mod_v, mod_a, mod_ang, mod_dang, mod_f;
+int16_t iCarMode = MODE_NEUTRAL;
 
 // FlightController commands definitions
 float commandSteer, commandCam, commandThrottle;
