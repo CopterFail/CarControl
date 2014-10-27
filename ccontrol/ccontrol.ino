@@ -42,8 +42,8 @@
     #define LED_STATUS 6
 
     // Features requested
-    #define Magnetometer
-    #define BatteryMonitorCurrent
+    //#define Magnetometer
+    //#define BatteryMonitorCurrent
     //#define GPS
     
     // Critical sensors on board (gyro/accel)
@@ -83,6 +83,9 @@
   
 void setup() {
 
+    LED_Init();
+    LED_SetStatus( YELLOW_LT );
+
     // Initialize serial communication
     Serial.begin(38400); // Virtual USB Serial on teensy 3.0 is always 12 Mbit/sec (can be initialized with baud rate 0)
 
@@ -111,22 +114,29 @@ void setup() {
     
     // Read data from EEPROM to CONFIG union
     readEEPROM();
-    
+
     // Initialize motors/receivers/sensors
     initializeESC();    
     initializeReceiver();
     
-    sensors.initializeGyro();
-    sensors.initializeAccel();
+    LED_SetStatus( BLUE_LT );
+
+    //sensors.initializeGyro();
+    //sensors.initializeAccel();
     
 #ifdef Magnetometer
     sensors.initializeMag();
 #endif
 
-    LED_Init();
-    
+
+    LED_SetStatus( GREEN_LT );
+
     // All is ready, start the loop
     all_ready = true;
+    itterations = 0;
+    sensorPreviousTime = micros();
+    previousTime = sensorPreviousTime;
+    
 }
 
 void loop() {   
@@ -139,10 +149,10 @@ void loop() {
     // Timer
     currentTime = micros();
     
-    // Read data (not faster then every 1 ms)
-    if (currentTime - sensorPreviousTime >= 1000) {
-        sensors.readGyroSum();
-        sensors.readAccelSum();        
+    // Read data (not faster then every 2 ms)
+    if (currentTime - sensorPreviousTime >= 2000) {
+        //sensors.readGyroSum();
+        //sensors.readAccelSum();        
     }    
     
     // 100 Hz task loop (10 ms)
@@ -176,8 +186,8 @@ void loop() {
 }
 
 void process100HzTask() {    
-    sensors.evaluateGyro();
-    sensors.evaluateAccel();
+    //sensors.evaluateGyro();
+    //sensors.evaluateAccel();
     
 #ifdef GPS
     sensors.readGPS();
@@ -189,14 +199,9 @@ void process100HzTask() {
     // Update kinematics with latest data
     //kinematics_update(gyro[XAXIS], gyro[YAXIS], gyro[ZAXIS], accel[XAXIS], accel[YAXIS], accel[ZAXIS]);
     
-    // This is the place where the actual "force" gets applied
-    if (armed) {
-        updateMotors(); // Update ESCs
-    } 
 }
 
 void process50HzTask() {
-    int16_t servo;
     
 #ifdef SUMD_IS_ACTIVE  
     ReceiverReadPacket(); // dab 2014-02-01: non interrupt controlled receiver reading  
@@ -205,22 +210,10 @@ void process50HzTask() {
     processPilotCommands();
     updateModell_50Hz();
 
-    servo = (int16_t)(mod_ang * 1000.0 / 3.14);
-    if( servo > 500 )
-    { 
-      servo = 500;
-    }
-    if( servo < -500 )
-    { 
-      servo = -500;
-    }
-    
-    //if( (dz<10) && (dz>-10) ) dz = 0;
-    MotorOut[2] = (uint16_t)(1500 + servo);
-    MotorOut[2] = TX_roll;
-    MotorOut[3] = TX_yaw;
+    MotorOut[2] = icommandCam + TX_CENTER;
+    MotorOut[3] = icommandSteer + TX_CENTER;
     MotorOut[1] = 1500; // not used
-    MotorOut[0] = TX_pitch;
+    MotorOut[0] = icommandThrottle + TX_CENTER;;
     updateMotors();
     
     LED_50Hz();

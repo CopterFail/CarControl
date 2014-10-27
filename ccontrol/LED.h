@@ -9,18 +9,22 @@
 #define LED_H_
 
 
-#define LED_STATUS_COUNT	10
+#define LED_STATUS_COUNT	5
 #define LED_STATUS_MAX 		255
 
 
 #ifdef LED_STATUS
 
-#define RED		strip.Color(LED_STATUS_MAX, 0,              0)
-#define RED_LT		strip.Color(LED_STATUS_MAX>>3, 0,              0)
-#define GREEN	strip.Color(0,              LED_STATUS_MAX, 0)
-#define BLUE	strip.Color(0,              0,              LED_STATUS_MAX)
-#define WHITE	strip.Color(LED_STATUS_MAX, LED_STATUS_MAX, LED_STATUS_MAX)
-#define YELLOW	strip.Color(LED_STATUS_MAX, LED_STATUS_MAX, 0)
+#define RED	  strip.Color(LED_STATUS_MAX, 0,              0)
+#define RED_LT	  strip.Color(LED_STATUS_MAX>>3, 0,              0)
+#define GREEN	  strip.Color(0,              LED_STATUS_MAX, 0)
+#define GREEN_LT  strip.Color(0,              LED_STATUS_MAX>>3, 0)
+#define BLUE      strip.Color(0,              0,              LED_STATUS_MAX)
+#define BLUE_LT   strip.Color(0,              0,              LED_STATUS_MAX>>3)
+#define WHITE     strip.Color(LED_STATUS_MAX, LED_STATUS_MAX, LED_STATUS_MAX)
+#define WHITE_LT  strip.Color(LED_STATUS_MAX>>2, LED_STATUS_MAX>>2, LED_STATUS_MAX>>2)
+#define YELLOW	  strip.Color(LED_STATUS_MAX, LED_STATUS_MAX, 0)
+#define YELLOW_LT strip.Color(LED_STATUS_MAX>>3, LED_STATUS_MAX>>3, 0)
 #define BLACK	strip.Color(0,              0,              0)
 
 Adafruit_NeoPixel strip = Adafruit_NeoPixel(LED_STATUS_COUNT, LED_STATUS, NEO_GRB + NEO_KHZ800);
@@ -83,24 +87,20 @@ void LED_OFF( void )
 
 }
 
+void LED_SetStatus( uint32_t color )
+{
+#ifdef LED_STATUS
+    uint16_t i;
+    for( i=0; i<LED_STATUS_COUNT; i++ )
+    {
+    	strip.setPixelColor(i,color);
+    }
+    strip.show();	// this will take some time
+#endif
+}
+  
 void LED_50Hz( void )
 {
-/*
-#ifdef LED_WHITE
-    // Blink "aircraft beacon" LED
-    if ((Beacon_LED_state == 51) || (Beacon_LED_state == 59) || (Beacon_LED_state == 67)) {
-        digitalWrite(LED_WHITE, HIGH);
-    } else {
-        digitalWrite(LED_WHITE, LOW);
-    }
-
-    Beacon_LED_state++;
-
-    if (Beacon_LED_state >= 100) {
-        Beacon_LED_state = 0;
-    }
-#endif
-*/
 }
 
 void LED_10Hz( void )
@@ -118,15 +118,13 @@ void LED_10Hz( void )
 // A multi color LED Stripe take 5 x 40us = 0.2ms time to update
 // LED-Stripe: MultiColor WS2812B 5V
 #ifdef LED_STATUS
-
-
     switch( iCarMode )
     {
       case MODE_BREAK:
         status = RED;
         break;
       case MODE_BACKWARD:
-        status = WHITE;
+        status = WHITE_LT;
         break;
       case MODE_NEUTRAL:
         status = RED_LT;
@@ -136,19 +134,14 @@ void LED_10Hz( void )
         status = RED_LT;
         break;
     }
-      
-    for( i=0; i<5; i++ )
-    {
-    	strip.setPixelColor(i,    status);
-    	//strip.setPixelColor(i+5,  status);
-    }
-    strip.show();	// this will take some time
     
+    //ToDo: signal failsafe
+    LED_SetStatus( status );
 #endif
 
 
 // LED-Stripe: Red(12V), White(12V)
-    if (armed) {
+    if (1) {
         LED_ON();
     } else {
         LED_OFF();
@@ -159,7 +152,7 @@ void LED_1Hz( void )
 {
 // LED-Stripe: Red(12V), White(12V)
     // Armed/ Dis-armed indicator
-    if (!armed) {
+    if (1) {
         LED_ON();
     } else {
         LED_OFF();

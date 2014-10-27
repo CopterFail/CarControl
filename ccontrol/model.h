@@ -19,31 +19,39 @@ void updateModell_50Hz( void )
 	mod_v    += T * mod_a;
 	mod_dang  = gyro[ZAXIS];
 	mod_ang  += T * mod_dang; 
-	mod_f     = commandThrottle;
+	mod_f     = (float)icommandThrottle * 0.005;
 	// commandSteer
 }
 
-#define TX_DEAD_BAND 10
-#define TX_CENTER 1500
 void updateModell_10Hz( void )
 {
-    int16_t iThrottle = TX_pitch - TX_CENTER;
+    static int16_t iNeutralDelay=0;
     switch( iCarMode )
     {
       case MODE_BREAK:
-        if( iThrottle >= 0 ) iCarMode = MODE_NEUTRAL;
+        if( icommandThrottle >= 0 ) iCarMode = MODE_NEUTRAL;
         break;
       case MODE_BACKWARD:
-        if( iThrottle >= 0 ) iCarMode = MODE_NEUTRAL;
+        if( icommandThrottle >= 0 ) iCarMode = MODE_NEUTRAL;
         break;
       case MODE_NEUTRAL:
-        if( iThrottle >= TX_DEAD_BAND ) iCarMode = MODE_NORMAL;
-        if( iThrottle <= -TX_DEAD_BAND ) iCarMode = MODE_BACKWARD;
+        if( icommandThrottle >= TX_DEAD_BAND ) iCarMode = MODE_NORMAL;
+        if( icommandThrottle <= -TX_DEAD_BAND ) iCarMode = MODE_BACKWARD;
         break;
       case MODE_NORMAL:
       default:
-        if( ( iThrottle > -TX_DEAD_BAND ) && ( iThrottle < TX_DEAD_BAND ) ) iCarMode = MODE_NEUTRAL;
-        if( iThrottle <= -TX_DEAD_BAND ) iCarMode = MODE_BREAK;
+        if( ( icommandThrottle > -TX_DEAD_BAND ) && ( icommandThrottle < TX_DEAD_BAND ) )
+        { 
+           if( iNeutralDelay > 3 )
+             iCarMode = MODE_NEUTRAL;
+           else 
+             iNeutralDelay++;
+        }
+        else
+        {
+          iNeutralDelay=0;
+        }
+        if( icommandThrottle <= -TX_DEAD_BAND ) iCarMode = MODE_BREAK;
         break;
     }
 }

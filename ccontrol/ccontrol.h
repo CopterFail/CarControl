@@ -6,7 +6,6 @@ uint8_t frameCounter = 0;
 uint32_t itterations = 0;
 
 bool all_ready = false;
-bool armed = false;
 
 // Flight modes
 #define RATE_MODE 0
@@ -33,6 +32,10 @@ bool armed = false;
 #define MODE_BREAK   3
 #define MODE_BACKWARD 4
 
+// Tx defines:
+#define TX_DEAD_BAND 10
+#define TX_CENTER 1500
+
 // Blinking LED to indicate activity
 bool Arduino_LED_state = 0;
 uint8_t Beacon_LED_state = 0;
@@ -48,8 +51,7 @@ float mod_v, mod_a, mod_ang, mod_dang, mod_f;
 int16_t iCarMode = MODE_NEUTRAL;
 
 // FlightController commands definitions
-float commandSteer, commandCam, commandThrottle;
-uint8_t flightMode = RATE_MODE;
+int16_t icommandSteer, icommandCam, icommandThrottle;
 
 // PID variables
 int16_t throttle = 1000;

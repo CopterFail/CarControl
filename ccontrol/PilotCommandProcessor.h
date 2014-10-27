@@ -41,10 +41,7 @@ void processPilotCommands() {
     
     sei(); // enable interrupts
     
-    // controller is now dis-armed
-    armed = false;
-    
-    commandSteer = TX_roll * 0.0015;
-    commandCam = TX_pitch * 0.0015;
-    commandThrottle = TX_throttle * 0.0015;
+    icommandSteer = TX_yaw - TX_CENTER;
+    icommandCam = TX_roll - TX_CENTER;
+    icommandThrottle = TX_pitch - TX_CENTER;
 }    
