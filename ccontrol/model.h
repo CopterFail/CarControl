@@ -42,7 +42,7 @@ void updateModell_10Hz( void )
       default:
         if( ( icommandThrottle > -TX_DEAD_BAND ) && ( icommandThrottle < TX_DEAD_BAND ) )
         { 
-           if( iNeutralDelay > 3 )
+           if( iNeutralDelay > 5 )
              iCarMode = MODE_NEUTRAL;
            else 
              iNeutralDelay++;

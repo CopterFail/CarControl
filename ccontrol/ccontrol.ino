@@ -215,6 +215,7 @@ void process50HzTask() {
     MotorOut[1] = 1500; // not used
     MotorOut[0] = icommandThrottle + TX_CENTER;;
     updateMotors();
+    //ToDo: use servo.h
     
     LED_50Hz();
 }

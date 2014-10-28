@@ -1,0 +1,17 @@
+From left to right (see photo):
+- Receiver 7,4V (Balancer plug)
+- empty 7,4V
+- Video Tx 7,4V
+- 5V BEC input 7,4V
+- Motor ESC, 6V supply
+- Steering Servo 6V
+- Camera Servo 6V
+
+- 5V BEC supply
+- RGB LEDs 5V
+- Camera or MinimOsd video in 5V
+
+Wired Connector:
+- 7,4V balancer
+- Serial 2 and 5V MinimOsd Connector
+

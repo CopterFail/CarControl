@@ -21,15 +21,18 @@ PIN setup (Teensy 3.1 pin numbering)
   - I2C SCL 19
   - I2C SDA 18
   
-  - PPM in (receiver) 3
+  - Hott Rx Serial 1 (receiver) 3
+  - Receiver PPM
   
-  - Rotor 1 
-  - Rotor 2
-  - Rotor 3 
-  - Rotor 4 
+  - Mavlink Serial 2 Tx
+  - Mavlink Serial 2 Rx
+
+  - Camera Servo 22 
+  - Steering Servo 21
+  - Motor ESC 20 
   
-  - Lights / Armed-Disarmed indicator 14
+  - Heardbeat LED 13 (Arduino Led)
   - RGB LEDs 6
   
-  - Battery Monitor (current sensor) 17
+
   
