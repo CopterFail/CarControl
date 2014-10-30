@@ -95,7 +95,7 @@ void LED_SetStatus( uint32_t color )
     {
     	strip.setPixelColor(i,color);
     }
-    strip.show();	// this will take some time
+    strip.show();	// this will take some time and disturb the servo interrupts
 #endif
 }
   
@@ -106,13 +106,13 @@ void LED_50Hz( void )
 void LED_10Hz( void )
 {
 	uint32_t status;
+     static uint32_t laststatus=0;
 	uint16_t i, update=0;
 
 #ifdef LED_ARDUINO
     // Blink integrated arduino LED
     Arduino_LED_state = !Arduino_LED_state;
     digitalWrite(LED_ARDUINO, Arduino_LED_state);
-
 #endif
 
 // A multi color LED Stripe take 5 x 40us = 0.2ms time to update
@@ -136,7 +136,11 @@ void LED_10Hz( void )
     }
     
     //ToDo: signal failsafe
-    LED_SetStatus( status );
+    if( laststatus != status )
+    {
+      LED_SetStatus( status );
+      laststatus = status;
+    }
 #endif
 
 

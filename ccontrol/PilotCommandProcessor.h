@@ -44,4 +44,6 @@ void processPilotCommands() {
     icommandSteer = TX_yaw - TX_CENTER;
     icommandCam = TX_roll - TX_CENTER;
     icommandThrottle = TX_pitch - TX_CENTER;
+    icommandMode = TX_AUX1 / 630;
+    icommandAux = TX_AUX2 - TX_CENTER;
 }    

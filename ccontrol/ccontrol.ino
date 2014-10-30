@@ -22,6 +22,7 @@
 #include <Wire.h>
 #include <EEPROM.h>
 #include <Adafruit_NeoPixel.h>
+#include <Servo.h>
 
 
 // Custom imports
@@ -38,8 +39,12 @@
     // Led defines
     //#define LED_WHITE 2
     //#define LED_BLUE 4
-    #define LED_ARDUINO 13
-    #define LED_STATUS 6
+    #define LED_ARDUINO     13
+    #define LED_STATUS       6
+    
+    #define PIN_SERVO_CAM   20
+    #define PIN_SERVO_STEER 21
+    #define PIN_ESC_MOTOR   22
 
     // Features requested
     //#define Magnetometer
@@ -63,10 +68,6 @@
     #include <Receiver_teensy3_HW_SUMD.h>
 
     
-    // Motor / ESC / servo
-    #include <ESC_teensy3_HW3.h>     
-
-    
 
 #endif
 
@@ -80,7 +81,10 @@
 #include "LED.h"
 #include "model.h"
 
-  
+Servo servoSteer;
+Servo servoCam;
+Servo servoEsc;
+
 void setup() {
 
     LED_Init();
@@ -116,18 +120,20 @@ void setup() {
     readEEPROM();
 
     // Initialize motors/receivers/sensors
-    initializeESC();    
     initializeReceiver();
+    
+    servoCam.attach( PIN_SERVO_CAM );
+    servoSteer.attach( PIN_SERVO_STEER );
+    servoEsc.attach( PIN_ESC_MOTOR );
     
     LED_SetStatus( BLUE_LT );
 
-    //sensors.initializeGyro();
-    //sensors.initializeAccel();
+    sensors.initializeGyro();
+    sensors.initializeAccel();
     
 #ifdef Magnetometer
     sensors.initializeMag();
 #endif
-
 
     LED_SetStatus( GREEN_LT );
 
@@ -151,8 +157,8 @@ void loop() {
     
     // Read data (not faster then every 2 ms)
     if (currentTime - sensorPreviousTime >= 2000) {
-        //sensors.readGyroSum();
-        //sensors.readAccelSum();        
+        sensors.readGyroSum();
+        sensors.readAccelSum();        
     }    
     
     // 100 Hz task loop (10 ms)
@@ -186,8 +192,8 @@ void loop() {
 }
 
 void process100HzTask() {    
-    //sensors.evaluateGyro();
-    //sensors.evaluateAccel();
+    sensors.evaluateGyro();
+    sensors.evaluateAccel();
     
 #ifdef GPS
     sensors.readGPS();
@@ -210,12 +216,22 @@ void process50HzTask() {
     processPilotCommands();
     updateModell_50Hz();
 
-    MotorOut[2] = icommandCam + TX_CENTER;
-    MotorOut[3] = icommandSteer + TX_CENTER;
-    MotorOut[1] = 1500; // not used
-    MotorOut[0] = icommandThrottle + TX_CENTER;;
-    updateMotors();
-    //ToDo: use servo.h
+    if( icommandMode >= 2) {
+      icommandSteer = icommandSteer - 250 * gyro[ZAXIS];
+    }
+    if( icommandMode >= 3) {
+      if( icommandThrottle > 100 ) {
+        icommandThrottle = (int16_t)((float)icommandThrottle * ( accel[XAXIS] / 10.0 + 1.0 ) / (1.0 + 1.0) );
+      }
+    }
+    
+    servoCam.write( constrain( icommandCam + TX_CENTER, 1000, 2000 ) );   
+    servoSteer.write( constrain( icommandSteer + TX_CENTER, 1000, 2000 ) );
+    servoEsc.write( constrain( icommandThrottle + TX_CENTER, 1000, 2000 ) );
+    MotorOut[2] = constrain( icommandCam + TX_CENTER, 1000, 2000 );
+    MotorOut[3] = constrain( icommandSteer + TX_CENTER, 1000, 2000 );
+    MotorOut[0] = constrain( icommandThrottle + TX_CENTER, 1000, 2000 );
+    //updateMotors();
     
     LED_50Hz();
 }
@@ -248,5 +264,5 @@ void process10HzTask() {
 
 void process1HzTask() {   
  //   LED_1Hz();
- //Serial.println( gyro[ZAXIS] );
+ Serial.println( icommandMode );
 }

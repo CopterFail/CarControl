@@ -242,8 +242,9 @@ class Configurator {
                 case PSP_SET_MOTOR_TEST_VALUE:
                     // data_buffer should contain 2 bytes (byte 0 = motor number, byte 1 = value)
                     if (data_buffer[0] < MOTORS) { // Check if motor number is within our setup
-                        MotorOut[data_buffer[0]] = 1000 + (data_buffer[1] * 10);
-                        updateMotors(); // Update ESCs
+                        //MotorOut[data_buffer[0]] = 1000 + (data_buffer[1] * 10);
+                        //updateMotors(); // Update ESCs
+                        
                     } else { // Motor number is not in our setup
                         REFUSED();
                     }

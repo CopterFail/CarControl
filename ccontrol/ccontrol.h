@@ -52,6 +52,7 @@ int16_t iCarMode = MODE_NEUTRAL;
 
 // FlightController commands definitions
 int16_t icommandSteer, icommandCam, icommandThrottle;
+int16_t icommandMode, icommandAux;
 
 // PID variables
 int16_t throttle = 1000;
