@@ -3,7 +3,7 @@
 	- a gyro sensor to detect / correct z-axis rotation
 	- an acc sensor to detect forward/backward (LED control, x-axis) and check traction (y-axis)
 	- hott or ppm connection from rx
-	- telemetry to rx (hott) and minimosd(mavlink)
+	- telemetry to rx (hott) and minimosd(mavlink)?
 	- RGB LED (ws2812b), color and intensity
 	- switches for power LED
 	- 2 servo outputs steering , camera
@@ -50,6 +50,7 @@
     //#define Magnetometer
     //#define BatteryMonitorCurrent
     //#define GPS
+    #define HOTT_TELEMETRIE
     
     // Critical sensors on board (gyro/accel)
     #include <mpu6050_10DOF_stick_px01.h>
@@ -80,6 +81,9 @@
 #include "SerialCommunication.h"  
 #include "LED.h"
 #include "model.h"
+#ifdef HOTT_TELEMETRIE
+#include "HottTelemetrie.h"
+#endif
 
 Servo servoSteer;
 Servo servoCam;
@@ -94,7 +98,7 @@ void setup() {
     Serial.begin(38400); // Virtual USB Serial on teensy 3.0 is always 12 Mbit/sec (can be initialized with baud rate 0)
 
 #ifdef GPS
-    Serial3.begin(38400);
+    Serial2.begin(38400);
 #endif
  
     // Join I2C bus as master
@@ -124,6 +128,7 @@ void setup() {
     
     servoCam.attach( PIN_SERVO_CAM );
     servoSteer.attach( PIN_SERVO_STEER );
+
     servoEsc.attach( PIN_ESC_MOTOR );
     
     LED_SetStatus( BLUE_LT );
@@ -133,6 +138,12 @@ void setup() {
     
 #ifdef Magnetometer
     sensors.initializeMag();
+#endif
+
+#ifdef HOTT_TELEMETRIE
+    Serial3.begin(19200);
+    i32HottTelemetrieInit();
+    ui32HottCount=0;
 #endif
 
     LED_SetStatus( GREEN_LT );
@@ -155,6 +166,8 @@ void loop() {
     // Timer
     currentTime = micros();
     
+    SerialEvent3();
+
     // Read data (not faster then every 2 ms)
     if (currentTime - sensorPreviousTime >= 2000) {
         sensors.readGyroSum();
@@ -207,7 +220,8 @@ void process100HzTask() {
     
 }
 
-void process50HzTask() {
+void process50HzTask()
+{
     
 #ifdef SUMD_IS_ACTIVE  
     ReceiverReadPacket(); // dab 2014-02-01: non interrupt controlled receiver reading  
@@ -220,7 +234,7 @@ void process50HzTask() {
       icommandSteer = icommandSteer - 250 * gyro[ZAXIS];
     }
     if( icommandMode >= 3) {
-      if( icommandThrottle > 100 ) {
+      if( ( icommandThrottle > 100 ) && ( accel[XAXIS] >= 0.0 ) ) {
         icommandThrottle = (int16_t)((float)icommandThrottle * ( accel[XAXIS] / 10.0 + 1.0 ) / (1.0 + 1.0) );
       }
     }
@@ -228,28 +242,25 @@ void process50HzTask() {
     servoCam.write( constrain( icommandCam + TX_CENTER, 1000, 2000 ) );   
     servoSteer.write( constrain( icommandSteer + TX_CENTER, 1000, 2000 ) );
     servoEsc.write( constrain( icommandThrottle + TX_CENTER, 1000, 2000 ) );
-    MotorOut[2] = constrain( icommandCam + TX_CENTER, 1000, 2000 );
-    MotorOut[3] = constrain( icommandSteer + TX_CENTER, 1000, 2000 );
-    MotorOut[0] = constrain( icommandThrottle + TX_CENTER, 1000, 2000 );
-    //updateMotors();
     
     LED_50Hz();
+
 }
 
 void process10HzTask() {
     // Trigger RX failsafe function every 100ms
     RX_failSafe();
     //if(failsafeEnabled) ..
-    
+
 #ifdef Magnetometer
     sensors.readMag();
     sensors.evaluateMag();
 #endif
-    
+
 #ifdef BatteryMonitorCurrent
     readBatteryMonitorCurrent();
-#endif   
-    
+#endif
+
     // Print itterations per 100ms
 #ifdef DISPLAY_ITTERATIONS
     Serial.println(itterations);
@@ -257,12 +268,73 @@ void process10HzTask() {
 
     updateModell_10Hz();
     LED_10Hz();
-    
+
     // Reset Itterations
-    itterations = 0;    
+    itterations = 0;
 }
 
-void process1HzTask() {   
- //   LED_1Hz();
- Serial.println( icommandMode );
+
+void process1HzTask()
+{
+    LED_1Hz();
+   Serial.println( ui32HottCount );
 }
+
+
+void SerialEvent3()
+{
+#ifdef HOTT_TELEMETRIE
+	static int16_t  i16Size = 0;
+	static int16_t  i16Pos = 0;
+	static uint32_t ui32Start = 0u;
+	static uint32_t ui32Waiting = 0u;
+	static uint8_t ui8Mode = 0;
+	uint8_t c;
+
+
+	if( Serial3.available() )
+	{
+		c = Serial3.read();
+		if( ui8Mode == 0 )
+		{
+			i16Size = i32HottTelemetrieLoop( c );
+			if( i16Size > 0 )
+			{
+				ui32Start = micros();
+				ui32Waiting = 5000;
+				i16Pos = 0;
+				ui8Mode = 1;
+				//Serial.println( "S" );
+			}
+		}
+		else
+		{
+			//
+		}
+	}
+
+	if( ui32Waiting > 0 )
+	{
+		if ( ( micros() - ui32Start ) >= ui32Waiting )
+		{
+			if( i16Pos < i16Size )
+			{
+				c = aui8HottTelemetrieSendBuffer()[i16Pos];
+				Serial3.write( c );
+				i16Pos++;
+				ui32Start = micros();
+				ui32Waiting = 3000;
+			}
+			else
+			{
+				ui8Mode = 0;
+				ui32Waiting = 0;
+				ui32HottCount++;
+				//Serial.println( "E" );
+			}
+		}
+	}
+#endif
+}
+
+
