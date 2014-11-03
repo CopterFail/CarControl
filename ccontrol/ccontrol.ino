@@ -31,6 +31,7 @@
 #include "math.h"
 #include "dataStorage.h"
 
+void SerialEventHoTT( void );
 
 // == Hardware setup/s == 
 #define SCT10_SHIELD_V_01
@@ -166,12 +167,13 @@ void loop() {
     // Timer
     currentTime = micros();
     
-    SerialEvent3();
+    SerialEventHoTT();  // this will be call too often...
 
-    // Read data (not faster then every 2 ms)
-    if (currentTime - sensorPreviousTime >= 2000) {
+    // Read data (not faster then every ms)
+    if (currentTime - sensorPreviousTime >= 1000) {
         sensors.readGyroSum();
-        sensors.readAccelSum();        
+        sensors.readAccelSum();
+        sensorPreviousTime = currentTime;
     }    
     
     // 100 Hz task loop (10 ms)
@@ -222,6 +224,7 @@ void process100HzTask() {
 
 void process50HzTask()
 {
+	int16_t iAuxFactor;
     
 #ifdef SUMD_IS_ACTIVE  
     ReceiverReadPacket(); // dab 2014-02-01: non interrupt controlled receiver reading  
@@ -231,11 +234,13 @@ void process50HzTask()
     updateModell_50Hz();
 
     if( icommandMode >= 2) {
-      icommandSteer = icommandSteer - 250 * gyro[ZAXIS];
+      iAuxFactor = ( icommandAux + 500 ) / 4;
+      icommandSteer = icommandSteer - iAuxFactor * gyro[ZAXIS];
     }
     if( icommandMode >= 3) {
+    	iAuxFactor = ( icommandAux + 500 ) / 40;
       if( ( icommandThrottle > 100 ) && ( accel[XAXIS] >= 0.0 ) ) {
-        icommandThrottle = (int16_t)((float)icommandThrottle * ( accel[XAXIS] / 10.0 + 1.0 ) / (1.0 + 1.0) );
+        icommandThrottle = (int16_t)((float)icommandThrottle * ( accel[XAXIS] / iAuxFactor + 1.0 ) / (1.0 + 1.0) );
       }
     }
     
@@ -281,7 +286,7 @@ void process1HzTask()
 }
 
 
-void SerialEvent3()
+void SerialEventHoTT( void )
 {
 #ifdef HOTT_TELEMETRIE
 	static int16_t  i16Size = 0;
@@ -301,7 +306,7 @@ void SerialEvent3()
 			if( i16Size > 0 )
 			{
 				ui32Start = micros();
-				ui32Waiting = 5000;
+				ui32Waiting = HOTT_IDLE_TIME;
 				i16Pos = 0;
 				ui8Mode = 1;
 				//Serial.println( "S" );
@@ -323,7 +328,7 @@ void SerialEvent3()
 				Serial3.write( c );
 				i16Pos++;
 				ui32Start = micros();
-				ui32Waiting = 3000;
+				ui32Waiting = HOTT_DELAY_TIME;
 			}
 			else
 			{

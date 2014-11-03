@@ -35,11 +35,6 @@
 #define EAM_SENSOR_DISABLED			0
 #define ESC_SENSOR_DISABLED			0
 
-
-// timing variables
-#define IDLE_TIME 10	// idle line delay to prevent data crashes on telemetry line.
-#define DATA_TIME 3		// time between 2 transmitted bytes
-
 // sizes and lengths
 #define climbratesize 50			// defines size of ring buffer for climbrate calculation
 #define statussize 21				// number of characters in status line

@@ -26,6 +26,7 @@
 
 // Private variables
 static uint8_t tx_buffer[HOTT_MAX_MESSAGE_LENGTH];
+uint32_t ui32HottCount;
 
 
 // Private functions
@@ -154,9 +155,9 @@ uint16_t build_VARIO_message(struct hott_vario_message *msg)
 	msg->alarm_inverse |= (0) ? VARIO_INVERT_CR10S : 0;
 
 	// altitude relative to ground
-	msg->altitude = scale_float2uword(1, 1, OFFSET_ALTITUDE);
+	msg->altitude = scale_float2uword((float)ui32HottCount, 1, OFFSET_ALTITUDE);
 	msg->min_altitude = scale_float2uword(0, 1, OFFSET_ALTITUDE);
-	msg->max_altitude = scale_float2uword(2, 1, OFFSET_ALTITUDE);
+	msg->max_altitude = scale_float2uword(1000, 1, OFFSET_ALTITUDE);
 
 	// climbrate
 	msg->climbrate = scale_float2uword(0, M_TO_CM, OFFSET_CLIMBRATE);
@@ -209,7 +210,7 @@ uint16_t build_GPS_message(struct hott_gps_message *msg)
 
 	// gps direction, groundspeed and postition
 	msg->flight_direction = scale_float2uint8(0, DEG_TO_UINT, 0);
-	msg->gps_speed = scale_float2uword(0, MS_TO_KMH, 0);
+	msg->gps_speed = scale_float2uword(1, MS_TO_KMH, 0);
 	convert_long2gps(0, &msg->latitude_ns, &msg->latitude_min, &msg->latitude_sec);
 	convert_long2gps(0, &msg->longitude_ew, &msg->longitude_min, &msg->longitude_sec);
 
@@ -410,6 +411,14 @@ uint16_t build_TEXT_message(struct hott_text_message *msg)
 	msg->stop = HOTT_STOP;
 	msg->sensor_id = HOTT_TEXT_ID;
 
+	memcpy(msg->text[0], "1234567", 8);
+	memcpy(msg->text[1], "1234567", 8);
+	memcpy(msg->text[2], "1234567", 8);
+	memcpy(msg->text[3], "1234567", 8);
+	memcpy(msg->text[4], "1234567", 8);
+	memcpy(msg->text[5], "1234567", 8);
+	memcpy(msg->text[6], "1234567", 8);
+
 	msg->checksum = calc_checksum((uint8_t *)msg, sizeof(*msg));
 	return sizeof(*msg);
 }
@@ -424,7 +433,7 @@ void update_telemetrydata ()
 {
 	//ToDo: update all available data
 
-	snprintf(statusline, sizeof(statusline), "%12s,%8s", "123456789ABC", "12345678");
+	snprintf(statusline, sizeof(statusline), "%12s,%8s", "CarControl", "HoTT");
 }
 
 /**
