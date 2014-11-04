@@ -76,7 +76,6 @@ void setup() {
     
     servoCam.attach( PIN_SERVO_CAM );
     servoSteer.attach( PIN_SERVO_STEER );
-
     servoEsc.attach( PIN_ESC_MOTOR );
     
 //    LED_SetStatus( BLUE_LT );
@@ -113,14 +112,16 @@ void loop()
     // Timer
     currentTime = micros();
     
-#ifdef HOTT_TELEMETRIE
-    SerialEventHoTT();  // this will be call too often...
-#endif
-
     // Read data (not faster then every ms)
-    if (currentTime - sensorPreviousTime >= 1000) {
+    if ( ( currentTime - sensorPreviousTime ) >= 1000)
+    {
         sensors.readGyroSum();
         sensors.readAccelSum();
+
+#ifdef HOTT_TELEMETRIE
+        SerialEventHoTT();  // this will be call too often...
+#endif
+
         sensorPreviousTime = currentTime;
     }    
     

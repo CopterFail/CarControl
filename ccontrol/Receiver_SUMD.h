@@ -13,7 +13,7 @@
 #define SUMD_SYNC 0xA8
 #define RX_BUFFER_SIZE 37  // (3 + RX_CHANNELS * 2 + 2)
 
-#define SUMD_IS_ACTIVE
+
 
 volatile uint8_t tmpRX[RX_BUFFER_SIZE];
 uint16_t ui16RxCnt=0;
