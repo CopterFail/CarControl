@@ -6,7 +6,7 @@ Feature support:
 	- a gyro sensor to detect / correct z-axis rotation for drift stabilisation
 	- an acc sensor to detect forward/backward (LED control, x-axis) and check traction (y-axis)
 	- hott or ppm connection from rx
-	- telemetry to rx (hott) and minimosd(mavlink)
+	- telemetry to rx (hott)
 	- RGB LED (ws2812b), color and intensity
 	- switches for power LED
 	- 2 servo outputs steering , camera
@@ -24,8 +24,8 @@ PIN setup (Teensy 3.1 pin numbering)
   - Hott Rx Serial 1 (receiver) 3
   - Receiver PPM
   
-  - Mavlink Serial 2 Tx
-  - Mavlink Serial 2 Rx
+  - Hott Telemetrie Serial 3 Tx
+  - Hott Telemetrie Serial 3 Rx
 
   - Camera Servo 22 
   - Steering Servo 21
@@ -33,6 +33,8 @@ PIN setup (Teensy 3.1 pin numbering)
   
   - Heardbeat LED 13 (Arduino Led)
   - RGB LEDs 6
+  - Power LEDs 23
+  - Horn 11
   
 
   

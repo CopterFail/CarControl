@@ -19,67 +19,30 @@
 
 // Arduino standard library imports
 #include <Arduino.h>
-#include <Wire.h>
-#include <EEPROM.h>
-#include <Adafruit_NeoPixel.h>
 #include <Servo.h>
 
+#include <Wire.h> 	 			// not needed here, but needed to link the complete sketch
+#include <Adafruit_NeoPixel.h>  // dto.
+#include <EEPROM.h>             // dto.
 
-// Custom imports
-#include "ccontrol.h"
+#include "defines.h"
 #include "sensors.h"
-#include "math.h"
 #include "dataStorage.h"
+#include "receiver.h"
 
-void SerialEventHoTT( void );
+// Modulo definitions (integer remainder)
+#define TASK_50HZ 2
+#define TASK_10HZ 10
+#define TASK_1HZ 100
 
-// == Hardware setup/s == 
-#define SCT10_SHIELD_V_01
-
-#ifdef SCT10_SHIELD_V_01
-    // Led defines
-    //#define LED_WHITE 2
-    //#define LED_BLUE 4
-    #define LED_ARDUINO     13
-    #define LED_STATUS       6
-    
-    #define PIN_SERVO_CAM   20
-    #define PIN_SERVO_STEER 21
-    #define PIN_ESC_MOTOR   22
-
-    // Features requested
-    //#define Magnetometer
-    //#define BatteryMonitorCurrent
-    //#define GPS
-    #define HOTT_TELEMETRIE
-    
-    // Critical sensors on board (gyro/accel)
-    #include <mpu6050_10DOF_stick_px01.h>
-    
-    // Magnetometer
-    #include <Magnetometer_HMC5883L.h>
-    
-    // GPS (ublox neo 6m)
-    //#include <GPS_ublox.h>
-    
-    // Current sensor
-    #include <BatteryMonitor_current.h>
-    
-    // Receiver
-    //#include <Receiver_teensy3_HW_PPM.h>
-    #include <Receiver_teensy3_HW_SUMD.h>
-
-    
-
-#endif
-
-// == END of Hardware setup ==
-
+//#include <GPS_ublox.h>
+// Current sensor
+//#include <BatteryMonitor_current.h>
 
 // Include this last as it contains objects from previous declarations
-#include "GPS.h"
-#include "PilotCommandProcessor.h"
-#include "SerialCommunication.h"  
+//#include "GPS.h"
+#include "PilotCommand.h"
+#include "SerialCom.h"
 #include "LED.h"
 #include "model.h"
 #ifdef HOTT_TELEMETRIE
@@ -90,10 +53,13 @@ Servo servoSteer;
 Servo servoCam;
 Servo servoEsc;
 
+bool all_ready = false;
+
+
 void setup() {
 
     LED_Init();
-    LED_SetStatus( YELLOW_LT );
+//    LED_SetStatus( YELLOW_LT );
 
     // Initialize serial communication
     Serial.begin(38400); // Virtual USB Serial on teensy 3.0 is always 12 Mbit/sec (can be initialized with baud rate 0)
@@ -102,25 +68,6 @@ void setup() {
     Serial2.begin(38400);
 #endif
  
-    // Join I2C bus as master
-    Wire.begin();
-
-    // I2C bus hardware specific settings
-#if defined(__MK20DX128__)
-    I2C0_F = 0x00; // 2.4 MHz (prescaler 20)
-    I2C0_FLT = 4;
-#endif
-#if defined(__MK20DX256__)
-    //I2C0_F = 0x00; // 2.4 MHz (prescaler 20)
-    I2C0_F = 0x1A;	// 400kHz
-    I2C0_FLT = 4;
-#endif
-
-    
-#if defined(__AVR__)
-    TWBR = 12; // 400 KHz (maximum supported frequency)
-#endif
-    
     // Read data from EEPROM to CONFIG union
     readEEPROM();
 
@@ -132,42 +79,43 @@ void setup() {
 
     servoEsc.attach( PIN_ESC_MOTOR );
     
-    LED_SetStatus( BLUE_LT );
+//    LED_SetStatus( BLUE_LT );
+    sensors.initialize();
 
-    sensors.initializeGyro();
-    sensors.initializeAccel();
-    
-#ifdef Magnetometer
-    sensors.initializeMag();
-#endif
 
 #ifdef HOTT_TELEMETRIE
     Serial3.begin(19200);
     i32HottTelemetrieInit();
-    ui32HottCount=0;
 #endif
 
-    LED_SetStatus( GREEN_LT );
+#ifdef PIN_HORN
+    pinMode(PIN_HORN, OUTPUT);
+#endif
+
+ //   LED_SetStatus( GREEN_LT );
 
     // All is ready, start the loop
     all_ready = true;
-    itterations = 0;
-    sensorPreviousTime = micros();
-    previousTime = sensorPreviousTime;
     
 }
 
-void loop() {   
+void loop()
+{
+	// Main loop variables
+	static unsigned long currentTime = 0;
+	static unsigned long sensorPreviousTime = micros();;
+	static unsigned long previousTime = sensorPreviousTime;
+	static uint8_t frameCounter = 0;
+
     // Dont start the loop until everything is ready
     if (!all_ready) return; 
  
-    // Used to measure loop performance
-    itterations++;
-    
     // Timer
     currentTime = micros();
     
+#ifdef HOTT_TELEMETRIE
     SerialEventHoTT();  // this will be call too often...
+#endif
 
     // Read data (not faster then every ms)
     if (currentTime - sensorPreviousTime >= 1000) {
@@ -248,6 +196,16 @@ void process50HzTask()
     servoSteer.write( constrain( icommandSteer + TX_CENTER, 1000, 2000 ) );
     servoEsc.write( constrain( icommandThrottle + TX_CENTER, 1000, 2000 ) );
     
+    if ( icommandMode == 3 )
+    {
+        digitalWrite(PIN_HORN, HIGH);
+    }
+    else
+    {
+      digitalWrite(PIN_HORN, LOW);
+    }
+
+
     LED_50Hz();
 
 }
@@ -266,80 +224,15 @@ void process10HzTask() {
     readBatteryMonitorCurrent();
 #endif
 
-    // Print itterations per 100ms
-#ifdef DISPLAY_ITTERATIONS
-    Serial.println(itterations);
-#endif
-
     updateModell_10Hz();
     LED_10Hz();
-
-    // Reset Itterations
-    itterations = 0;
 }
 
 
 void process1HzTask()
 {
     LED_1Hz();
-   Serial.println( ui32HottCount );
-}
-
-
-void SerialEventHoTT( void )
-{
-#ifdef HOTT_TELEMETRIE
-	static int16_t  i16Size = 0;
-	static int16_t  i16Pos = 0;
-	static uint32_t ui32Start = 0u;
-	static uint32_t ui32Waiting = 0u;
-	static uint8_t ui8Mode = 0;
-	uint8_t c;
-
-
-	if( Serial3.available() )
-	{
-		c = Serial3.read();
-		if( ui8Mode == 0 )
-		{
-			i16Size = i32HottTelemetrieLoop( c );
-			if( i16Size > 0 )
-			{
-				ui32Start = micros();
-				ui32Waiting = HOTT_IDLE_TIME;
-				i16Pos = 0;
-				ui8Mode = 1;
-				//Serial.println( "S" );
-			}
-		}
-		else
-		{
-			//
-		}
-	}
-
-	if( ui32Waiting > 0 )
-	{
-		if ( ( micros() - ui32Start ) >= ui32Waiting )
-		{
-			if( i16Pos < i16Size )
-			{
-				c = aui8HottTelemetrieSendBuffer()[i16Pos];
-				Serial3.write( c );
-				i16Pos++;
-				ui32Start = micros();
-				ui32Waiting = HOTT_DELAY_TIME;
-			}
-			else
-			{
-				ui8Mode = 0;
-				ui32Waiting = 0;
-				ui32HottCount++;
-				//Serial.println( "E" );
-			}
-		}
-	}
-#endif
+//   Serial.println( ui32HottCount );
 }
 
 
