@@ -16,7 +16,7 @@
 
 // FlightController commands definitions
 extern int16_t icommandSteer, icommandCam, icommandThrottle;
-extern int16_t icommandMode, icommandAux;
+extern int16_t icommandMode, icommandAux, icommandParameter;
 extern uint64_t AUX_chan_mask;
 
 

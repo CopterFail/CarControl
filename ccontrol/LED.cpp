@@ -132,14 +132,21 @@ void LED_10Hz( void )
         status = WHITE_LT;
         break;
       case MODE_NEUTRAL:
-        status = RED_LT;
+    	if( iCarLight )
+    		status = RED_LT;
+    	else
+    		status = BLACK;
         break;
       case MODE_NORMAL:
       default:
-        status = RED_LT;
+      	if( iCarLight )
+      		status = RED_LT;
+      	else
+      		status = BLACK;
+          break;
         break;
     }
-    
+
     //ToDo: signal failsafe
     if( laststatus != status )
     {
@@ -147,15 +154,21 @@ void LED_10Hz( void )
       laststatus = status;
     }
 #endif
+
+    if( iCarLight )
+    	LED_ON();
+  	else
+  		LED_OFF();
+
 }
 
 void LED_1Hz( void )
 {
 	static int8_t itoggle = 0;
     if ( itoggle > 0 ) {
-        LED_ON();
+//        LED_ON();
     } else {
-        LED_OFF();
+//       LED_OFF();
     }
     itoggle = 1 - itoggle;
 }

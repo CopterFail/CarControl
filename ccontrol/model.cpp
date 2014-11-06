@@ -12,6 +12,7 @@
 float kinematicsAngle[3];
 float mod_v, mod_a, mod_ang, mod_dang, mod_f;
 int16_t iCarMode = MODE_NEUTRAL;
+int16_t iCarLight = 0;
 
 
 void InitModell( void )

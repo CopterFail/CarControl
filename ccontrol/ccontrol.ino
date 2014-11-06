@@ -183,14 +183,16 @@ void process50HzTask()
     updateModell_50Hz();
 
     if( icommandMode >= 2) {
-      iAuxFactor = ( icommandAux + 500 ) / 4;
+      iAuxFactor = ( icommandParameter + 500 ) / 4;
       icommandSteer = icommandSteer - iAuxFactor * gyro[ZAXIS];
     }
     if( icommandMode >= 3) {
-    	iAuxFactor = ( icommandAux + 500 ) / 40;
+/*
+    	iAuxFactor = ( icommandParameter + 500 ) / 40;
       if( ( icommandThrottle > 100 ) && ( accel[XAXIS] >= 0.0 ) ) {
         icommandThrottle = (int16_t)((float)icommandThrottle * ( accel[XAXIS] / iAuxFactor + 1.0 ) / (1.0 + 1.0) );
       }
+*/
     }
     
     servoCam.write( constrain( icommandCam + TX_CENTER, 1000, 2000 ) );   
@@ -206,6 +208,14 @@ void process50HzTask()
       digitalWrite(PIN_HORN, LOW);
     }
 
+    if( icommandAux > -100 )
+    {
+    	iCarLight = 1;
+    }
+    else
+    {
+    	iCarLight = 0;
+    }
 
     LED_50Hz();
 

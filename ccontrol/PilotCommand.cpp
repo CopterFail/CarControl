@@ -17,7 +17,7 @@
 
 // FlightController commands definitions
 int16_t icommandSteer, icommandCam, icommandThrottle;
-int16_t icommandMode, icommandAux;
+int16_t icommandMode, icommandAux, icommandParameter;
 
 
 static int16_t TX_roll, TX_pitch, TX_throttle, TX_yaw, TX_AUX1, TX_AUX2, TX_AUX3, TX_AUX4;
@@ -51,6 +51,7 @@ void processPilotCommands()
     icommandSteer = TX_yaw - TX_CENTER;
     icommandCam = TX_roll - TX_CENTER;
     icommandThrottle = TX_pitch - TX_CENTER;
+    icommandParameter = TX_throttle - TX_CENTER;
     icommandMode = TX_AUX1 / 630;
     icommandAux = TX_AUX2 - TX_CENTER;
 }    
