@@ -12,6 +12,7 @@
 #define RX_CHANNELS 16
 //extern
 extern volatile uint16_t RX[RX_CHANNELS];
+extern bool failsafeEnabled;
 
 
 void ReceiverReadPacket( void );

@@ -21,6 +21,11 @@
 
 #include <Arduino.h>
 
+#include "defines.h"
+#include "PilotCommand.h"
+#include "sensors.h"
+#include "model.h"
+
 #include "HottTelemetrieDef.h"
 //#include "HottTelemetrie.h"
 int32_t i32HottTelemetrieLoop( uint8_t data );
@@ -51,6 +56,7 @@ static uword_t scale_float2uword(float value, float scale, float offset);
 // timing variables
 #define HOTT_IDLE_TIME 10000  // idle line delay to prevent data crashes on telemetry line.
 #define HOTT_DELAY_TIME 3000  // time between 2 transmitted bytes
+#define SERIALHOTT Serial3
 
 
 
@@ -64,9 +70,9 @@ void SerialEventHoTT( void )
 	uint8_t c;
 
 
-	if( Serial3.available() )
+	if( SERIALHOTT.available() )
 	{
-		c = Serial3.read();
+		c = SERIALHOTT.read();
 		if( ui8Mode == 0 )
 		{
 			i16Size = i32HottTelemetrieLoop( c );
@@ -92,7 +98,7 @@ void SerialEventHoTT( void )
 			if( i16Pos < i16Size )
 			{
 				c = aui8HottTelemetrieSendBuffer()[i16Pos];
-				Serial3.write( c );
+				SERIALHOTT.write( c );
 				i16Pos++;
 				ui32Start = micros();
 				ui32Waiting = HOTT_DELAY_TIME;
@@ -196,9 +202,10 @@ int32_t i32HottTelemetrieLoop(uint8_t data)
  */
 uint16_t build_VARIO_message(struct hott_vario_message *msg)
 {
-	update_telemetrydata();
 	if (VARIO_SENSOR_DISABLED)
 		return 0;
+
+	update_telemetrydata();
 
 	// clear message buffer
 	memset(msg, 0, sizeof(*msg));
@@ -223,9 +230,9 @@ uint16_t build_VARIO_message(struct hott_vario_message *msg)
 	msg->alarm_inverse |= (0) ? VARIO_INVERT_CR10S : 0;
 
 	// altitude relative to ground
-	msg->altitude = scale_float2uword((float)ui32HottCount, 1, OFFSET_ALTITUDE);
-	msg->min_altitude = scale_float2uword(0, 1, OFFSET_ALTITUDE);
-	msg->max_altitude = scale_float2uword(1000, 1, OFFSET_ALTITUDE);
+	msg->altitude = scale_float2uword(gyro[ZAXIS], 1, OFFSET_ALTITUDE);
+	msg->min_altitude = scale_float2uword(accel[YAXIS], 1, OFFSET_ALTITUDE);
+	msg->max_altitude = scale_float2uword((float)ui32HottCount, 1, OFFSET_ALTITUDE);
 
 	// climbrate
 	msg->climbrate = scale_float2uword(0, M_TO_CM, OFFSET_CLIMBRATE);
@@ -249,10 +256,10 @@ uint16_t build_VARIO_message(struct hott_vario_message *msg)
 
 uint16_t build_GPS_message(struct hott_gps_message *msg)
 {
-	update_telemetrydata();
-
 	if (GPS_SENSOR_DISABLED)
 		return 0;
+
+	update_telemetrydata();
 
 	// clear message buffer
 	memset(msg, 0, sizeof(*msg));
@@ -277,8 +284,8 @@ uint16_t build_GPS_message(struct hott_gps_message *msg)
 	msg->alarm_inverse2 |= (0) ? GPS_INVERT2_POS : 0;
 
 	// gps direction, groundspeed and postition
-	msg->flight_direction = scale_float2uint8(0, DEG_TO_UINT, 0);
-	msg->gps_speed = scale_float2uword(1, MS_TO_KMH, 0);
+	msg->flight_direction = scale_float2uint8(mod_ang, DEG_TO_UINT, 0);
+	msg->gps_speed = scale_float2uword(mod_v, MS_TO_KMH, 0);
 	convert_long2gps(0, &msg->latitude_ns, &msg->latitude_min, &msg->latitude_sec);
 	convert_long2gps(0, &msg->longitude_ew, &msg->longitude_min, &msg->longitude_sec);
 
@@ -321,10 +328,10 @@ uint16_t build_GPS_message(struct hott_gps_message *msg)
 
 uint16_t build_GAM_message(struct hott_gam_message *msg)
 {
-	update_telemetrydata();
-
 	if (GAM_SENSOR_DISABLED)
 		return 0;
+
+	update_telemetrydata();
 
 	// clear message buffer
 	memset(msg, 0, sizeof(*msg));
@@ -375,10 +382,10 @@ uint16_t build_GAM_message(struct hott_gam_message *msg)
 
 uint16_t build_EAM_message(struct hott_eam_message *msg)
 {
-	update_telemetrydata();
-
 	if (EAM_SENSOR_DISABLED)
 		return 0;
+
+	update_telemetrydata();
 
 	// clear message buffer
 	memset(msg, 0, sizeof(*msg));
@@ -432,10 +439,10 @@ uint16_t build_EAM_message(struct hott_eam_message *msg)
 
 uint16_t build_ESC_message(struct hott_esc_message *msg)
 {
-	update_telemetrydata();
-
 	if (ESC_SENSOR_DISABLED)
 		return 0;
+
+	update_telemetrydata();
 
 	// clear message buffer
 	memset(msg, 0, sizeof(*msg));
@@ -479,13 +486,7 @@ uint16_t build_TEXT_message(struct hott_text_message *msg)
 	msg->stop = HOTT_STOP;
 	msg->sensor_id = HOTT_TEXT_ID;
 
-	memcpy(msg->text[0], "1234567", 8);
-	memcpy(msg->text[1], "1234567", 8);
-	memcpy(msg->text[2], "1234567", 8);
-	memcpy(msg->text[3], "1234567", 8);
-	memcpy(msg->text[4], "1234567", 8);
-	memcpy(msg->text[5], "1234567", 8);
-	memcpy(msg->text[6], "1234567", 8);
+	//memcpy(msg->text[0], "1234567", 8);
 
 	msg->checksum = calc_checksum((uint8_t *)msg, sizeof(*msg));
 	return sizeof(*msg);
@@ -501,7 +502,18 @@ void update_telemetrydata ()
 {
 	//ToDo: update all available data
 
-	snprintf(statusline, sizeof(statusline), "%12s,%8s", "CarControl", "HoTT");
+
+    switch( icommandMode ){
+    default:
+    	snprintf(statusline, sizeof(statusline), "%12s,%8s", "Manual", "Mode");
+    	break;
+    case 2:
+    	snprintf(statusline, sizeof(statusline), "%12s,%8s", "Gyro", "Mode");
+    	break;
+    case 3:
+    	snprintf(statusline, sizeof(statusline), "%12s,%8s", "Gyro & Acc", "Mode");
+    	break;
+    }
 }
 
 /**

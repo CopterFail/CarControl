@@ -31,9 +31,9 @@
 // hott settings
 #define VARIO_SENSOR_DISABLED 		0
 #define GPS_SENSOR_DISABLED 		0
-#define GAM_SENSOR_DISABLED			0
-#define EAM_SENSOR_DISABLED			0
-#define ESC_SENSOR_DISABLED			0
+#define GAM_SENSOR_DISABLED			1
+#define EAM_SENSOR_DISABLED			1
+#define ESC_SENSOR_DISABLED			1
 
 // sizes and lengths
 #define climbratesize 50			// defines size of ring buffer for climbrate calculation

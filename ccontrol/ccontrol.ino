@@ -29,6 +29,7 @@
 #include "sensors.h"
 #include "dataStorage.h"
 #include "receiver.h"
+#include "math.h"
 
 // Modulo definitions (integer remainder)
 #define TASK_50HZ 2
@@ -174,6 +175,7 @@ void process100HzTask() {
 void process50HzTask()
 {
 	int16_t iAuxFactor;
+	static int16_t iThrottleLimit = 500;
     
 #ifdef SUMD_IS_ACTIVE  
     ReceiverReadPacket(); // dab 2014-02-01: non interrupt controlled receiver reading  
@@ -183,21 +185,24 @@ void process50HzTask()
     updateModell_50Hz();
 
     if( icommandMode >= 2) {
+      // primitive, but works:
       iAuxFactor = ( icommandParameter + 500 ) / 4;
       icommandSteer = icommandSteer - iAuxFactor * gyro[ZAXIS];
     }
     if( icommandMode >= 3) {
-/*
-    	iAuxFactor = ( icommandParameter + 500 ) / 40;
-      if( ( icommandThrottle > 100 ) && ( accel[XAXIS] >= 0.0 ) ) {
-        icommandThrottle = (int16_t)((float)icommandThrottle * ( accel[XAXIS] / iAuxFactor + 1.0 ) / (1.0 + 1.0) );
-      }
-*/
+    	iThrottleLimit = filterSmooth(500 - (int16_t)( accel[YAXIS] * 100 ), iThrottleLimit, 0.4 );
+        iThrottleLimit = constrain( iThrottleLimit, 250, 500 );
+    }
+    else
+    {
+    	iThrottleLimit = 500;
     }
     
+    if(failsafeEnabled) icommandThrottle = 0;
+
     servoCam.write( constrain( icommandCam + TX_CENTER, 1000, 2000 ) );   
     servoSteer.write( constrain( icommandSteer + TX_CENTER, 1000, 2000 ) );
-    servoEsc.write( constrain( icommandThrottle + TX_CENTER, 1000, 2000 ) );
+    servoEsc.write( constrain( icommandThrottle + TX_CENTER, TX_CENTER-iThrottleLimit, TX_CENTER+iThrottleLimit ) );
     
     if ( icommandMode == 3 )
     {
