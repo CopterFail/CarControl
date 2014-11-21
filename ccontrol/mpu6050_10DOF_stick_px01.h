@@ -346,6 +346,7 @@ void SensorArray::initializeGyro() {
 }
 
 void SensorArray::initializeAccel() {
+	calibrateAccel(); // takes time, must be in a fixed horizontal pos.
 }
 
 void SensorArray::calibrateAccel() {

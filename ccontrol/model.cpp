@@ -1,11 +1,12 @@
 
 #include <Arduino.h>
+#include <math.h>
 
 #include "defines.h"
 #include "sensors.h"
 #include "PilotCommand.h"
 
-#define T 0.05
+#define T 0.02
 
 
 // Kinematics variable definitions
@@ -28,12 +29,34 @@ void InitModell( void )
 
 void updateModell_50Hz( void )
 {
+	static uint16_t CntNoThrottle = 0;
 	mod_a     = accel[XAXIS];
 	mod_v    += T * mod_a;
 	mod_dang  = gyro[ZAXIS];
 	mod_ang  += T * mod_dang; 
+
+	if( mod_ang > M_PI ) mod_ang -= 2 * M_PI;
+	else if( mod_ang < -M_PI ) mod_ang += 2 * M_PI;
+
 	mod_f     = (float)icommandThrottle * 0.005;
 	// commandSteer
+
+	if( (icommandThrottle > -10)  && (icommandThrottle < 10) )
+	{
+		if( CntNoThrottle > 40 )
+		{
+			mod_v = 0.0;
+		}
+		else
+		{
+			CntNoThrottle++;
+		}
+	}
+	else
+	{
+		CntNoThrottle = 0;
+	}
+
 }
 
 void updateModell_10Hz( void )
@@ -68,3 +91,28 @@ void updateModell_10Hz( void )
         break;
     }
 }
+
+
+/**
+ * winkel des vector x,y zum x-Einheitsvector
+ */
+float AngelXY( float x, float y )
+{
+	float cosa, a;
+	int neg = 0;
+
+	if( y< 0 )
+	{
+		y = -y;
+		neg = 1;
+	}
+	cosa = ( x + y ) / sqrt( x*x + y*y );
+	a = acos( cosa );
+	if( neg )
+	{
+		a = -a;
+	}
+	return a;
+}
+
+

@@ -198,7 +198,11 @@ void process50HzTask()
     	iThrottleLimit = 500;
     }
     
-    if(failsafeEnabled) icommandThrottle = 0;
+    if(failsafeEnabled)
+    {
+    	icommandThrottle = 0;
+    	iCarLight = (iCarLight+1) & 127;
+    }
 
     servoCam.write( constrain( icommandCam + TX_CENTER, 1000, 2000 ) );   
     servoSteer.write( constrain( icommandSteer + TX_CENTER, 1000, 2000 ) );
@@ -215,7 +219,16 @@ void process50HzTask()
 
     if( icommandAux > -100 )
     {
-    	iCarLight = 1;
+    	if( icommandAux > 100 )
+    	{
+    		iAuxFactor = ( icommandParameter + 500 ) / 4;
+    		iCarLight = iAuxFactor;
+    		if( iCarLight < 10 )
+    		{
+    			iCarLight = 0;
+    		}
+    	}
+
     }
     else
     {
@@ -248,7 +261,6 @@ void process10HzTask() {
 void process1HzTask()
 {
     LED_1Hz();
-//   Serial.println( ui32HottCount );
 }
 
 

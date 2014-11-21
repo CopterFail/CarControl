@@ -89,8 +89,18 @@ void LED_OFF( void )
 #ifdef LED_RED
     digitalWrite(LED_RED, LOW);
 #endif
-
 }
+
+void LED_PWM( uint16_t ival )
+{
+#ifdef LED_WHITE
+	analogWrite(LED_WHITE, ival);
+#endif
+#ifdef LED_RED
+	analogWrite(LED_RED, ival);
+#endif
+}
+
 
 void LED_SetStatus( uint32_t color )
 {
@@ -155,10 +165,13 @@ void LED_10Hz( void )
     }
 #endif
 
+/*
     if( iCarLight )
     	LED_ON();
   	else
   		LED_OFF();
+*/
+    LED_PWM( iCarLight );
 
 }
 

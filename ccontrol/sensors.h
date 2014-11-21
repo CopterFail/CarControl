@@ -37,5 +37,10 @@ class SensorArray {
 extern float gyro[3];
 extern float accel[3];
 extern float gyro_temperature;
+
+extern int16_t magRaw[3];
+extern float magHeadingX, magHeadingY;
+extern float magHeadingAbsolute;
+
 extern SensorArray sensors;
 

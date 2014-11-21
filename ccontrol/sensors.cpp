@@ -21,6 +21,10 @@ float gyro[3];
 float accel[3];
 float gyro_temperature;
 
+int16_t magRaw[3];
+float magHeadingX, magHeadingY;
+float magHeadingAbsolute = 0.0;
+
 
 SensorArray sensors;
 

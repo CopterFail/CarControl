@@ -54,9 +54,11 @@ static uword_t scale_float2uword(float value, float scale, float offset);
 
 
 // timing variables
-#define HOTT_IDLE_TIME 10000  // idle line delay to prevent data crashes on telemetry line.
+#define HOTT_IDLE_TIME 9000 //10000  // idle line delay to prevent data crashes on telemetry line.
 #define HOTT_DELAY_TIME 3000  // time between 2 transmitted bytes
 #define SERIALHOTT Serial3
+#define RECEIVING	0
+#define SENDING		1
 
 
 
@@ -66,14 +68,14 @@ void SerialEventHoTT( void )
 	static int16_t  i16Pos = 0;
 	static uint32_t ui32Start = 0u;
 	static uint32_t ui32Waiting = 0u;
-	static uint8_t ui8Mode = 0;
+	static uint8_t ui8Mode = RECEIVING;
 	uint8_t c;
 
 
 	if( SERIALHOTT.available() )
 	{
 		c = SERIALHOTT.read();
-		if( ui8Mode == 0 )
+		if( ui8Mode == RECEIVING )
 		{
 			i16Size = i32HottTelemetrieLoop( c );
 			if( i16Size > 0 )
@@ -81,34 +83,44 @@ void SerialEventHoTT( void )
 				ui32Start = micros();
 				ui32Waiting = HOTT_IDLE_TIME;
 				i16Pos = 0;
-				ui8Mode = 1;
-				//Serial.println( "S" );
+				ui8Mode = SENDING;
 			}
 		}
 		else
 		{
-			//
+			// if "sending" we will receive our sended chars - check this?
+			if( i16Pos == 0 )	// receive a char while waiting for idle time ...
+			{
+				i16Size = i32HottTelemetrieLoop( c );
+				ui8Mode = RECEIVING;
+			}
 		}
 	}
 
-	if( ui32Waiting > 0 )
+	if( (ui32Waiting > 0) && (ui8Mode == SENDING) )
 	{
 		if ( ( micros() - ui32Start ) >= ui32Waiting )
 		{
 			if( i16Pos < i16Size )
 			{
-				c = aui8HottTelemetrieSendBuffer()[i16Pos];
+				c = tx_buffer[i16Pos];
 				SERIALHOTT.write( c );
 				i16Pos++;
 				ui32Start = micros();
-				ui32Waiting = HOTT_DELAY_TIME;
+				if(i16Pos < i16Size)
+				{
+					ui32Waiting = HOTT_DELAY_TIME;
+				}
+				else
+				{
+					ui32Waiting = 500;
+				}
 			}
 			else
 			{
-				ui8Mode = 0;
+				ui8Mode = RECEIVING;
 				ui32Waiting = 0;
 				ui32HottCount++;
-				//Serial.println( "E" );
 			}
 		}
 	}
@@ -148,6 +160,7 @@ int32_t i32HottTelemetrieLoop(uint8_t data)
 {
 	static uint8_t rx_buffer[2] = { 0, 0 };
 	static uint16_t message_size = 0;
+	static uint8_t last_rx_0=0;
 
 	// shift receiver buffer. make room for one byte.
 	rx_buffer[1] = rx_buffer[0];
@@ -155,6 +168,11 @@ int32_t i32HottTelemetrieLoop(uint8_t data)
 	// examine received data stream
 	if (rx_buffer[1] == HOTT_BINARY_ID) {
 		// first received byte looks like a binary request. check second received byte for a sensor id.
+		if( last_rx_0 == rx_buffer[0] )
+		{
+			rx_buffer[0] = 0;
+		}
+		last_rx_0 = rx_buffer[0];
 		switch (rx_buffer[0]) {
 			case HOTT_VARIO_ID:
 				message_size = build_VARIO_message((struct hott_vario_message *)tx_buffer);
@@ -235,20 +253,20 @@ uint16_t build_VARIO_message(struct hott_vario_message *msg)
 	msg->max_altitude = scale_float2uword((float)ui32HottCount, 1, OFFSET_ALTITUDE);
 
 	// climbrate
-	msg->climbrate = scale_float2uword(0, M_TO_CM, OFFSET_CLIMBRATE);
-	msg->climbrate3s = scale_float2uword(0, M_TO_CM, OFFSET_CLIMBRATE);
-	msg->climbrate10s = scale_float2uword(0, M_TO_CM, OFFSET_CLIMBRATE);
+	msg->climbrate = scale_float2uword(1, M_TO_CM, OFFSET_CLIMBRATE);
+	msg->climbrate3s = scale_float2uword(2, M_TO_CM, OFFSET_CLIMBRATE);
+	msg->climbrate10s = scale_float2uword(3, M_TO_CM, OFFSET_CLIMBRATE);
 
 	// compass
-	msg->compass = scale_float2int8(1, DEG_TO_UINT, 0);
+	msg->compass = scale_float2int8(90, DEG_TO_UINT, 0);
 
 	// statusline
 	memcpy(msg->ascii, statusline, sizeof(msg->ascii));
 
 	// free display characters
-	msg->ascii1 = 0;
-	msg->ascii2 = 0;
-	msg->ascii3 = 0;
+	msg->ascii1 = 'A';
+	msg->ascii2 = 'B';
+	msg->ascii3 = 'C';
 
 	msg->checksum = calc_checksum((uint8_t *)msg, sizeof(*msg));
 	return sizeof(*msg);
@@ -256,6 +274,8 @@ uint16_t build_VARIO_message(struct hott_vario_message *msg)
 
 uint16_t build_GPS_message(struct hott_gps_message *msg)
 {
+	static uint8_t idx=0;
+
 	if (GPS_SENSOR_DISABLED)
 		return 0;
 
@@ -284,14 +304,18 @@ uint16_t build_GPS_message(struct hott_gps_message *msg)
 	msg->alarm_inverse2 |= (0) ? GPS_INVERT2_POS : 0;
 
 	// gps direction, groundspeed and postition
-	msg->flight_direction = scale_float2uint8(mod_ang, DEG_TO_UINT, 0);
-	msg->gps_speed = scale_float2uword(mod_v, MS_TO_KMH, 0);
+#ifdef GPS
+#else
+#endif
+	msg->flight_direction = scale_float2uint8( mod_ang * 180.0 / M_PI + 180.0, DEG_TO_UINT, 0);
+	msg->flight_direction = scale_float2uint8( magHeadingAbsolute * 180.0 / M_PI + 180.0, DEG_TO_UINT, 0);
+	msg->gps_speed = scale_float2uword( fabs(mod_v), MS_TO_KMH, 0);
 	convert_long2gps(0, &msg->latitude_ns, &msg->latitude_min, &msg->latitude_sec);
 	convert_long2gps(0, &msg->longitude_ew, &msg->longitude_min, &msg->longitude_sec);
 
 	// homelocation distance, course and state
-	msg->distance = scale_float2uword(0, 1, 0);
-	msg->home_direction = scale_float2uint8(0, DEG_TO_UINT, 0);
+	msg->distance = scale_float2uword(idx, 1, 0);
+	msg->home_direction = scale_float2uint8(180, DEG_TO_UINT, 0);
 	msg->ascii5 = (1 ? 'H' : '-');
 
 	// altitude relative to ground and climb rate
@@ -300,15 +324,16 @@ uint16_t build_GPS_message(struct hott_gps_message *msg)
 	msg->climbrate3s = scale_float2uint8(0, 1, OFFSET_CLIMBRATE3S);
 
 	// number of satellites,gps fix and state
-	msg->gps_num_sat = 8;
+	msg->gps_num_sat = idx++;
 	msg->gps_fix_char = '3';
+	if( idx > 7 ) idx=0;
 
 	msg->ascii6 = 0;
 
 	// model angles
 	msg->angle_roll = scale_float2int8(0, DEG_TO_UINT, 0);
 	msg->angle_nick = scale_float2int8(0, DEG_TO_UINT, 0);
-	msg->angle_compass = scale_float2int8(0, DEG_TO_UINT, 0);
+	msg->angle_compass = scale_float2int8(270, DEG_TO_UINT, 0);
 
 	// gps time
 	msg->gps_hour = 1;
@@ -320,7 +345,7 @@ uint16_t build_GPS_message(struct hott_gps_message *msg)
 	msg->msl = scale_float2uword(0, 1, 0);
 
 	// free display chararacter
-	msg->ascii4 = 0;
+	msg->ascii4 = 'D';
 
 	msg->checksum = calc_checksum((uint8_t *)msg, sizeof(*msg));
 	return sizeof(*msg);
@@ -505,13 +530,13 @@ void update_telemetrydata ()
 
     switch( icommandMode ){
     default:
-    	snprintf(statusline, sizeof(statusline), "%12s,%8s", "Manual", "Mode");
+    	snprintf(statusline, sizeof(statusline), "%12s,%8s", "Manual     ", "Mode");
     	break;
     case 2:
-    	snprintf(statusline, sizeof(statusline), "%12s,%8s", "Gyro", "Mode");
+    	snprintf(statusline, sizeof(statusline), "%12s,%8s", "Gyro       ", "Mode");
     	break;
     case 3:
-    	snprintf(statusline, sizeof(statusline), "%12s,%8s", "Gyro & Acc", "Mode");
+    	snprintf(statusline, sizeof(statusline), "%12s,%8s", "Gyro & Acc ", "Mode");
     	break;
     }
 }

@@ -27,9 +27,6 @@
 #define HMC5883L_GAIN_45            0xC0 // +- 4.5 Ga
 #define HMC5883L_GAIN_65            0xE0 // +- 6.5 Ga
 
-int16_t magRaw[3];
-float magHeadingX, magHeadingY;
-float magHeadingAbsolute = 0.0;
 
 class HMC5883L {
     public:
@@ -91,8 +88,10 @@ class HMC5883L {
             sensors.i2c_write8(HMC5883L_ADDRESS, HMC5883L_RA_MODE, HMC5883L_MODE_SINGLE);            
         };
         
-        void evaluateMag() {            
-            float cosRoll =  cos(kinematicsAngle[XAXIS]);
+        void evaluateMag()
+        {
+ /*
+        	float cosRoll =  cos(kinematicsAngle[XAXIS]);
             float sinRoll =  sin(kinematicsAngle[XAXIS]);
             float cosPitch = cos(kinematicsAngle[YAXIS]);
             float sinPitch = sin(kinematicsAngle[YAXIS]);  
@@ -109,6 +108,9 @@ class HMC5883L {
 
             // Calculate absolute heading
             magHeadingAbsolute = atan2(magHeadingY, magHeadingX);
+*/
+        	magHeadingAbsolute = atan2( magRaw[XAXIS], magRaw[YAXIS] );
+
         };
         
     private:
