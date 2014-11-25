@@ -13,7 +13,7 @@
 //#define LED_BLUE 4
 #define LED_ARDUINO     13
 #define LED_STATUS       6
-#define PIN_HORN 		11
+//#define PIN_HORN 		11
 
 #define PIN_SERVO_CAM   20
 #define PIN_SERVO_STEER 21
@@ -22,7 +22,7 @@
 // Features requested
 //#define Magnetometer
 //#define BatteryMonitorCurrent
-//#define GPS
+#define GPS
 #define HOTT_TELEMETRIE
 
 

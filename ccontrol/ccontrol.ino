@@ -41,7 +41,6 @@
 //#include <BatteryMonitor_current.h>
 
 // Include this last as it contains objects from previous declarations
-//#include "GPS.h"
 #include "PilotCommand.h"
 #include "SerialCom.h"
 #include "LED.h"
@@ -184,12 +183,13 @@ void process50HzTask()
     processPilotCommands();
     updateModell_50Hz();
 
-    if( icommandMode >= 2) {
+    // special car commands gyro(2) or acc(3) compensation:
+    if( icommandMode == 2) {
       // primitive, but works:
       iAuxFactor = ( icommandParameter + 500 ) / 4;
       icommandSteer = icommandSteer - iAuxFactor * gyro[ZAXIS];
     }
-    if( icommandMode >= 3) {
+    else if( icommandMode >= 3) {
     	iThrottleLimit = filterSmooth(500 - (int16_t)( accel[YAXIS] * 100 ), iThrottleLimit, 0.4 );
         iThrottleLimit = constrain( iThrottleLimit, 250, 500 );
     }
@@ -198,16 +198,21 @@ void process50HzTask()
     	iThrottleLimit = 500;
     }
     
+    // on rx failsafe, stop and pump the lights:
     if(failsafeEnabled)
     {
     	icommandThrottle = 0;
     	iCarLight = (iCarLight+1) & 127;
     }
 
+    // write output data:
     servoCam.write( constrain( icommandCam + TX_CENTER, 1000, 2000 ) );   
     servoSteer.write( constrain( icommandSteer + TX_CENTER, 1000, 2000 ) );
     servoEsc.write( constrain( icommandThrottle + TX_CENTER, TX_CENTER-iThrottleLimit, TX_CENTER+iThrottleLimit ) );
     
+    /*
+#ifdef PIN_HORN
+    // horn has still no suitable trigger:
     if ( icommandMode == 3 )
     {
         digitalWrite(PIN_HORN, HIGH);
@@ -216,6 +221,8 @@ void process50HzTask()
     {
       digitalWrite(PIN_HORN, LOW);
     }
+#endif
+    */
 
     if( icommandAux > -100 )
     {

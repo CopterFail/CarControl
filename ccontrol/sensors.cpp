@@ -16,6 +16,7 @@
 #include "sensors.h"
 #include "mpu6050_10DOF_stick_px01.h"
 #include "Magnetometer_HMC5883L.h"
+#include "GPS_ublox.h"
 
 float gyro[3];
 float accel[3];
@@ -24,7 +25,6 @@ float gyro_temperature;
 int16_t magRaw[3];
 float magHeadingX, magHeadingY;
 float magHeadingAbsolute = 0.0;
-
 
 SensorArray sensors;
 

@@ -274,7 +274,8 @@ uint16_t build_VARIO_message(struct hott_vario_message *msg)
 
 uint16_t build_GPS_message(struct hott_gps_message *msg)
 {
-	static uint8_t idx=0;
+	float dx,dy,dist;
+	float l1,l2,p1,p2,deg;
 
 	if (GPS_SENSOR_DISABLED)
 		return 0;
@@ -304,19 +305,28 @@ uint16_t build_GPS_message(struct hott_gps_message *msg)
 	msg->alarm_inverse2 |= (0) ? GPS_INVERT2_POS : 0;
 
 	// gps direction, groundspeed and postition
-#ifdef GPS
-#else
-#endif
-	msg->flight_direction = scale_float2uint8( mod_ang * 180.0 / M_PI + 180.0, DEG_TO_UINT, 0);
-	msg->flight_direction = scale_float2uint8( magHeadingAbsolute * 180.0 / M_PI + 180.0, DEG_TO_UINT, 0);
-	msg->gps_speed = scale_float2uword( fabs(mod_v), MS_TO_KMH, 0);
-	convert_long2gps(0, &msg->latitude_ns, &msg->latitude_min, &msg->latitude_sec);
-	convert_long2gps(0, &msg->longitude_ew, &msg->longitude_min, &msg->longitude_sec);
+	//msg->flight_direction = scale_float2uint8( mod_ang * 180.0 / M_PI + 180.0, DEG_TO_UINT, 0);
+	//msg->flight_direction = scale_float2uint8( magHeadingAbsolute * 180.0 / M_PI + 180.0, DEG_TO_UINT, 0);
+	msg->flight_direction = scale_float2uint8( gpsData.course, DEG_TO_UINT / 1000.0, 0);
+	msg->gps_speed = scale_float2uword( gpsData.speed, MS_TO_KMH / M_TO_CM, 0);
+	convert_long2gps(gpsData.lat, &msg->latitude_ns, &msg->latitude_min, &msg->latitude_sec);
+	convert_long2gps(gpsData.lon, &msg->longitude_ew, &msg->longitude_min, &msg->longitude_sec);
 
 	// homelocation distance, course and state
-	msg->distance = scale_float2uword(idx, 1, 0);
-	msg->home_direction = scale_float2uint8(180, DEG_TO_UINT, 0);
-	msg->ascii5 = (1 ? 'H' : '-');
+	dx = (gpsData.lon - gpsHome.lon) * 715 / 100000;
+	dy = (gpsData.lat - gpsHome.lat) * 1113 / 100000;
+	dist = sqrt( dx * dx + dy * dy );
+
+	l2 = gpsHome.lat * M_PI / 180.0 / 10e7;
+	p2 = gpsHome.lon * M_PI / 180.0 / 10e7;
+	l1 = gpsData.lat * M_PI / 180.0 / 10e7;
+	p1 = gpsData.lon * M_PI / 180.0 / 10e7;
+    deg = acos(sin(p1)*sin(p2)+ cos(p1)*cos(p2)*cos(l2 - l1));
+    deg *= 180.0 / M_PI;
+
+	msg->distance = scale_float2uword(dist, 1, 0);
+	msg->home_direction = scale_float2uint8(deg, DEG_TO_UINT, 0);
+	msg->ascii5 = ( (gpsHome.state>1) ? 'H' : '-');
 
 	// altitude relative to ground and climb rate
 	msg->altitude = scale_float2uword(0, 1, OFFSET_ALTITUDE);
@@ -324,9 +334,8 @@ uint16_t build_GPS_message(struct hott_gps_message *msg)
 	msg->climbrate3s = scale_float2uint8(0, 1, OFFSET_CLIMBRATE3S);
 
 	// number of satellites,gps fix and state
-	msg->gps_num_sat = idx++;
-	msg->gps_fix_char = '3';
-	if( idx > 7 ) idx=0;
+	msg->gps_num_sat = gpsData.sats;
+	msg->gps_fix_char = '0' + gpsData.state;
 
 	msg->ascii6 = 0;
 

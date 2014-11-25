@@ -42,5 +42,18 @@ extern int16_t magRaw[3];
 extern float magHeadingX, magHeadingY;
 extern float magHeadingAbsolute;
 
+extern struct tgpsData {
+    int32_t  lat,lon;   // position as degrees (*10E7)
+    int32_t  course;    // degrees (*10E5)
+    uint32_t speed;     // cm/s
+    int32_t  height;    // mm (from ellipsoid)
+    uint32_t accuracy;  // mm
+    uint32_t fixtime;   // fix
+    uint32_t sentences; // sentences/packets processed from gps (just statistics)
+    uint8_t  state;     // gps state
+    uint8_t  sats;      // number of satellites active
+} gpsData, gpsHome;
+
+
 extern SensorArray sensors;
 
