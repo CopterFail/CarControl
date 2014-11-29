@@ -23,6 +23,8 @@ PIN setup
   
   - Hott Rx Serial 1 (receiver) 3
   - Receiver PPM
+
+  - GPS Rx Serial 2 (NEO 6M) 9
   
   - Hott Telemetrie Serial 3 Tx
   - Hott Telemetrie Serial 3 Rx
@@ -33,7 +35,7 @@ PIN setup
   
   - Heardbeat LED 13 (Arduino Led)
   - RGB LEDs 6
-  - Power LEDs 23
+  - Power LEDs PWM 23
   - Horn 11
   
 
