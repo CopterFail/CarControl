@@ -220,6 +220,8 @@ int32_t i32HottTelemetrieLoop(uint8_t data)
  */
 uint16_t build_VARIO_message(struct hott_vario_message *msg)
 {
+	float deg;
+
 	if (VARIO_SENSOR_DISABLED)
 		return 0;
 
@@ -248,17 +250,18 @@ uint16_t build_VARIO_message(struct hott_vario_message *msg)
 	msg->alarm_inverse |= (0) ? VARIO_INVERT_CR10S : 0;
 
 	// altitude relative to ground
-	msg->altitude = scale_float2uword(gyro[ZAXIS], 1, OFFSET_ALTITUDE);
-	msg->min_altitude = scale_float2uword(accel[YAXIS], 1, OFFSET_ALTITUDE);
+	msg->altitude = scale_float2uword(gyro[ZAXIS]*1000, 1, OFFSET_ALTITUDE);
+	msg->min_altitude = scale_float2uword(accel[YAXIS]*1000, 1, OFFSET_ALTITUDE);
 	msg->max_altitude = scale_float2uword((float)ui32HottCount, 1, OFFSET_ALTITUDE);
 
 	// climbrate
-	msg->climbrate = scale_float2uword(1, M_TO_CM, OFFSET_CLIMBRATE);
+	msg->climbrate = scale_float2uword(gpsHome.speed, M_TO_CM, OFFSET_CLIMBRATE);
 	msg->climbrate3s = scale_float2uword(2, M_TO_CM, OFFSET_CLIMBRATE);
 	msg->climbrate10s = scale_float2uword(3, M_TO_CM, OFFSET_CLIMBRATE);
 
 	// compass
-	msg->compass = scale_float2int8(90, DEG_TO_UINT, 0);
+	deg = mod_ang * 180.0 / M_PI + 180.0
+	msg->compass = scale_float2int8(deg, DEG_TO_UINT, 0);
 
 	// statusline
 	memcpy(msg->ascii, statusline, sizeof(msg->ascii));
@@ -276,6 +279,7 @@ uint16_t build_GPS_message(struct hott_gps_message *msg)
 {
 	float dx,dy,dist;
 	float l1,l2,p1,p2,deg;
+	uint32_t t1,t2;
 
 	if (GPS_SENSOR_DISABLED)
 		return 0;
@@ -329,8 +333,8 @@ uint16_t build_GPS_message(struct hott_gps_message *msg)
 	msg->ascii5 = ( (gpsHome.state>1) ? 'H' : '-');
 
 	// altitude relative to ground and climb rate
-	msg->altitude = scale_float2uword(0, 1, OFFSET_ALTITUDE);
-	msg->climbrate = scale_float2uword(0, M_TO_CM, OFFSET_CLIMBRATE);
+	msg->altitude = scale_float2uword(gpsData.height/1000, 1, OFFSET_ALTITUDE);
+	msg->climbrate = scale_float2uword(gpsHome.speed, M_TO_CM, OFFSET_CLIMBRATE);
 	msg->climbrate3s = scale_float2uint8(0, 1, OFFSET_CLIMBRATE3S);
 
 	// number of satellites,gps fix and state
@@ -342,16 +346,23 @@ uint16_t build_GPS_message(struct hott_gps_message *msg)
 	// model angles
 	msg->angle_roll = scale_float2int8(0, DEG_TO_UINT, 0);
 	msg->angle_nick = scale_float2int8(0, DEG_TO_UINT, 0);
-	msg->angle_compass = scale_float2int8(270, DEG_TO_UINT, 0);
+	deg = mod_ang * 180.0 / M_PI + 180.0
+	msg->angle_compass = scale_float2int8(deg, DEG_TO_UINT, 0);
 
 	// gps time
-	msg->gps_hour = 1;
-	msg->gps_min = 2;
-	msg->gps_sec = 3;
+	t1 = gpsData.fixtime / 1000;  //s
 	msg->gps_msec = 0;
+	t2 = t1 / 60;  //m
+	msg->gps_sec = t1 - t2*60;
+	t1 = t2;
+	t2 = t1 / 60;  //h
+	msg->gps_min = t1 - t2*60;
+	t1 = t2;
+	t2 = t1 / 24;  //d
+	msg->gps_hour = t1 - t2*24;
 
 	// gps MSL (NN) altitude MSL
-	msg->msl = scale_float2uword(0, 1, 0);
+	msg->msl = scale_float2uword(gpsData.height/1000, 1, 0);
 
 	// free display chararacter
 	msg->ascii4 = 'D';
@@ -396,7 +407,7 @@ uint16_t build_GAM_message(struct hott_gam_message *msg)
 	msg->altitude = scale_float2uword(0, 1, OFFSET_ALTITUDE);
 
 	// climbrate
-	msg->climbrate = scale_float2uword(0, M_TO_CM, OFFSET_CLIMBRATE);
+	msg->climbrate = scale_float2uword(gpsHome.speed, M_TO_CM, OFFSET_CLIMBRATE);
 	msg->climbrate3s = scale_float2uint8(0, 1, OFFSET_CLIMBRATE3S);
 
 	// main battery
@@ -459,7 +470,7 @@ uint16_t build_EAM_message(struct hott_eam_message *msg)
 	msg->altitude = scale_float2uword(0, 1, OFFSET_ALTITUDE);
 
 	// climbrate
-	msg->climbrate = scale_float2uword(0, M_TO_CM, OFFSET_CLIMBRATE);
+	msg->climbrate = scale_float2uword(gpsHome.speed, M_TO_CM, OFFSET_CLIMBRATE);
 	msg->climbrate3s = scale_float2uint8(0, 1, OFFSET_CLIMBRATE3S);
 
 	// flight time

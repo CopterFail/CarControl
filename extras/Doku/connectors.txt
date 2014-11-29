@@ -1,17 +1,20 @@
 From left to right (see photo):
-- Receiver 7,4V (Balancer plug)
-- LED Front Lights 7,4V
-- Video Tx 7,4V
+- Receiver 7,4V, Rx only, 115kbaud (7,4V, Serial 1 Rx)
+- LED Front Lights 7,4V (PWM)
+- Video Tx 7,4V (Cam out)
 - 5V BEC (input) 7,4V
 - Motor ESC, 6V supply
 - Steering Servo 6V
 - Camera Servo 6V
 
 - 5V BEC (output)
-- RGB LEDs 5V
-- Camera or MinimOsd video in 5V
+- RGB LEDs 5V (Level shifter 3V3)
+- Camera or MinimOsd video in 5V (Cam in)
+- Free
+- Serial 2 Rx only, 38400 baud(GPS, 3V3 Supply regulator in wire)
+- Horn
+- Serial 3 HoTT, 19200 (Rx + Tx with diode)
 
 Wired Connector:
 - 7,4V balancer (input)
-- Serial 2 and 5V MinimOsd Connector
 

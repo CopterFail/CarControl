@@ -28,7 +28,7 @@ void UBLOX::read_packet( void )
 {
 	while (Serial2.available()) {
 		data = Serial2.read(); // store single byte from serial buffer into data variable
-
+//Serial.println(".");
 		switch (UBX_step) {
 			case 0:
 				if (data == 0xB5) { // UBX sync char 1
@@ -116,8 +116,10 @@ void UBLOX::read_packet( void )
         // use union to read the binary message
 void UBLOX::process_data( void )
 {
-	if (UBX_class == UBX_CLASS_NAV) {
-		if (UBX_id == UBX_ID_POSLLH) {
+	if (UBX_class == UBX_CLASS_NAV)
+	{
+		if (UBX_id == UBX_ID_POSLLH)
+		{
 			gpsData.lat = ubloxMessage.nav_posllh.lat; // +- 90 deg  - degrees multiplied by 10000000
 			gpsData.lon = ubloxMessage.nav_posllh.lon; // +- 180 deg - degrees multiplied by 10000000
 			gpsData.height = ubloxMessage.nav_posllh.height;
@@ -125,10 +127,13 @@ void UBLOX::process_data( void )
 			gpsData.fixtime = ubloxMessage.nav_posllh.iTow;
 			if( (gpsHome.state == 1) && (gpsData.state == 3) )
 			{
-				memcpy( &gpsHome, &gpsData, sizeof(tgpsData) );
+				memcpy( &gpsHome, &gpsData, sizeof(tgpsData) ); // why is this done more than once? Reset?
 			}
-		} else if (UBX_id == UBX_ID_STATUS) {
-			switch (ubloxMessage.nav_status.gpsFix) {
+		}
+		else if (UBX_id == UBX_ID_STATUS)
+		{
+			switch (ubloxMessage.nav_status.gpsFix)
+			{
 				case 2: // 2D FIX
 					gpsData.state = 2;
 				break;
@@ -139,19 +144,31 @@ void UBLOX::process_data( void )
 					gpsData.state = 1;
 				break;
 			}
-		} else if (UBX_id == UBX_ID_SOL) {
+		}
+		else if (UBX_id == UBX_ID_SOL)
+		{
 			gpsData.sats = ubloxMessage.nav_sol.numSV;
-		} else if (UBX_id == UBX_ID_VELNED) {
+		}
+		else if (UBX_id == UBX_ID_VELNED)
+		{
 			gpsData.course = ubloxMessage.nav_velned.heading / 100; // 10E-5 to millidegrees
 			gpsData.speed = ubloxMessage.nav_velned.gSpeed;
-		} else {
+			// todo: find a reset condition for gpsHome.speed
+			if( gpsData.speed > gpsHome.speed )
+			{
+				gpsHome.speed = gpsData.speed;
+			}
+		}
+		else
+		{
 			// ID wasn't defined above, print out ID for debugging purposes
 			// Serial.println(UBX_id, HEX);
 		}
 	}
 
 	// if GPS wasn't detected, flip the bit
-	if ((sensors.sensors_detected & GPS_DETECTED) == false) {
+	if ((sensors.sensors_detected & GPS_DETECTED) == false)
+	{
 		sensors.sensors_detected |= GPS_DETECTED;
 	}
 };

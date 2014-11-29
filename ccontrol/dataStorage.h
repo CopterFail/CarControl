@@ -16,7 +16,7 @@
     #define EEPROM_SIZE 512
 #endif    
 #if defined(__MK20DX256__)
-    #define EEPROM_SIZE 1024	//ToDo: Check this value, I expect 2048
+    #define EEPROM_SIZE 2048	//ToDo: Check this value, 1024? I expect 2048
 #endif    
 
 
