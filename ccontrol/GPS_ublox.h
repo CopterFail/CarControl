@@ -72,7 +72,7 @@ class UBLOX {
             uint32_t iTow;
             int32_t  fTow;
             int16_t  week;
-            uint8_t  gspFix;
+            uint8_t  gpsFix;
             uint8_t  flags;
             int32_t  ecefX;
             int32_t  ecefY;

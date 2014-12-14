@@ -260,7 +260,7 @@ uint16_t build_VARIO_message(struct hott_vario_message *msg)
 	msg->climbrate10s = scale_float2uword(3, M_TO_CM, OFFSET_CLIMBRATE);
 
 	// compass
-	deg = mod_ang * 180.0 / M_PI + 180.0
+	deg = mod_ang * 180.0 / M_PI + 180.0;
 	msg->compass = scale_float2int8(deg, DEG_TO_UINT, 0);
 
 	// statusline
@@ -346,7 +346,7 @@ uint16_t build_GPS_message(struct hott_gps_message *msg)
 	// model angles
 	msg->angle_roll = scale_float2int8(0, DEG_TO_UINT, 0);
 	msg->angle_nick = scale_float2int8(0, DEG_TO_UINT, 0);
-	deg = mod_ang * 180.0 / M_PI + 180.0
+	deg = mod_ang * 180.0 / M_PI + 180.0;
 	msg->angle_compass = scale_float2int8(deg, DEG_TO_UINT, 0);
 
 	// gps time
@@ -545,20 +545,24 @@ uint16_t build_TEXT_message(struct hott_text_message *msg)
 */
 void update_telemetrydata ()
 {
-	//ToDo: update all available data
+	char *cbuffer1, *cbuffer2;
 
-
-    switch( icommandMode ){
+    switch( icommandMode )
+    {
     default:
-    	snprintf(statusline, sizeof(statusline), "%12s,%8s", "Manual     ", "Mode");
+    	cbuffer1 = "Manual";
     	break;
     case 2:
-    	snprintf(statusline, sizeof(statusline), "%12s,%8s", "Gyro       ", "Mode");
+    	cbuffer1 = "Gyro";
     	break;
     case 3:
-    	snprintf(statusline, sizeof(statusline), "%12s,%8s", "Gyro & Acc ", "Mode");
+    	cbuffer1 = "Acc";
     	break;
     }
+
+    //snprintf(statusline, sizeof(statusline), "%11s,%8s", cbuffer1, cbuffer2);	// statusline can hold 21 chars incl terminating 0 ... 12 + 1 + 8 + 1 = 22 ; 12->11
+    snprintf(statusline, sizeof(statusline), "%11s,%8d", cbuffer1, ui32HottCount);
+
 }
 
 /**

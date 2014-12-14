@@ -198,6 +198,11 @@ struct telemetrydata{
 	float homecourse;
 	uint8_t last_armed;
 	char statusline[statussize];
+
+possible alternative for a car, still collecting:
+	float speed_act, speed_max;
+	float homedist_act, homedist_max;
+	uint32_t ui32HottCount;
 };
 */
 char statusline[statussize];

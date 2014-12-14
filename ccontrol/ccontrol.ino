@@ -48,10 +48,12 @@
 #ifdef HOTT_TELEMETRIE
 #include "HottTelemetrie.h"
 #endif
+#include "Beeper.h"
 
 Servo servoSteer;
 Servo servoCam;
 Servo servoEsc;
+Beeper beeper(PIN_HORN);
 
 bool all_ready = false;
 
@@ -87,9 +89,7 @@ void setup() {
     i32HottTelemetrieInit();
 #endif
 
-#ifdef PIN_HORN
-    pinMode(PIN_HORN, OUTPUT);
-#endif
+    beeper.ack();
 
  //   LED_SetStatus( GREEN_LT );
 
@@ -190,7 +190,12 @@ void process50HzTask()
       icommandSteer = icommandSteer - iAuxFactor * gyro[ZAXIS];
     }
     else if( icommandMode >= 3) {
-    	iThrottleLimit = filterSmooth(500 - (int16_t)( accel[YAXIS] * 100 ), iThrottleLimit, 0.4 );
+
+    	// accel[YAXIS] left is positive m/s2
+
+    	iAuxFactor = (int16_t)( accel[YAXIS] * 50 );
+    	if( iAuxFactor < 0 ) iAuxFactor = -iAuxFactor;
+    	iThrottleLimit = filterSmooth(500 - iAuxFactor, iThrottleLimit, 0.4 );
         iThrottleLimit = constrain( iThrottleLimit, 250, 500 );
     }
     else
@@ -210,19 +215,11 @@ void process50HzTask()
     servoSteer.write( constrain( icommandSteer + TX_CENTER, 1000, 2000 ) );
     servoEsc.write( constrain( icommandThrottle + TX_CENTER, TX_CENTER-iThrottleLimit, TX_CENTER+iThrottleLimit ) );
     
-    /*
-#ifdef PIN_HORN
     // horn has still no suitable trigger:
     if ( icommandMode == 3 )
     {
-        digitalWrite(PIN_HORN, HIGH);
+        beeper.beep(3);
     }
-    else
-    {
-      digitalWrite(PIN_HORN, LOW);
-    }
-#endif
-    */
 
     if( icommandAux > -100 )
     {
@@ -262,6 +259,7 @@ void process10HzTask() {
 
     updateModell_10Hz();
     LED_10Hz();
+    beeper.update();
 }
 
 
