@@ -10,9 +10,10 @@
 
 class Beeper {
 public:
-	Beeper( uint8_t ui8PinNumber );
+	Beeper();
 	virtual ~Beeper();
 
+	void attach( uint8_t ui8PinNumber );
 	void ack( void );
 	void nack( void );
 	void beep( uint8_t ui8beeps );
@@ -22,6 +23,8 @@ public:
 private:
 	uint8_t pin;
 	uint8_t tobeep;
+	uint8_t cnt;
+	uint8_t puls, pause;
 	bool active;
 };
 

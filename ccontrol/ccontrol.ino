@@ -53,7 +53,7 @@
 Servo servoSteer;
 Servo servoCam;
 Servo servoEsc;
-Beeper beeper(PIN_HORN);
+Beeper beeper;
 
 bool all_ready = false;
 
@@ -89,6 +89,7 @@ void setup() {
     i32HottTelemetrieInit();
 #endif
 
+    beeper.attach( PIN_HORN );
     beeper.ack();
 
  //   LED_SetStatus( GREEN_LT );
@@ -218,7 +219,7 @@ void process50HzTask()
     // horn has still no suitable trigger:
     if ( icommandMode == 3 )
     {
-        beeper.beep(3);
+        beeper.beep(5);
     }
 
     if( icommandAux > -100 )
@@ -240,6 +241,7 @@ void process50HzTask()
     }
 
     LED_50Hz();
+    beeper.update();
 
 }
 
@@ -259,13 +261,17 @@ void process10HzTask() {
 
     updateModell_10Hz();
     LED_10Hz();
-    beeper.update();
 }
 
 
 void process1HzTask()
 {
     LED_1Hz();
+    if(failsafeEnabled)
+    {
+    	beeper.nack();
+    }
+
 }
 
 
