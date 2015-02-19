@@ -21,4 +21,4 @@ extern uint64_t AUX_chan_mask;
 
 
 
-void processPilotCommands( void );
+int16_t processPilotCommands( void );

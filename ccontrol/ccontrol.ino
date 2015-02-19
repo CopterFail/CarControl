@@ -68,6 +68,7 @@ void setup() {
 
 #ifdef GPS
     Serial2.begin(38400);
+    pinMode( PIN_BUTTON, INPUT);     
 #endif
  
     // Read data from EEPROM to CONFIG union
@@ -181,7 +182,10 @@ void process50HzTask()
     ReceiverReadPacket(); // dab 2014-02-01: non interrupt controlled receiver reading  
 #endif
 
-    processPilotCommands();
+    if( processPilotCommands() > 0 )
+    {
+    	beeper.ack();
+    }
     updateModell_50Hz();
 
     // special car commands gyro(2) or acc(3) compensation:
@@ -259,6 +263,19 @@ void process10HzTask() {
     readBatteryMonitorCurrent();
 #endif
 
+#ifdef GPS
+    if( !digitalRead(PIN_BUTTON) )
+    {
+      if( gpsHome.sats ){
+      	gpsHome.state = 1;
+	gpsHome.sats = 0;
+        beeper.ack();
+      }else{
+        beeper.nack();
+      }
+    }
+#endif
+
     updateModell_10Hz();
     LED_10Hz();
 }
@@ -266,12 +283,18 @@ void process10HzTask() {
 
 void process1HzTask()
 {
+	static uint8_t  sec = 0;
     LED_1Hz();
+
     if(failsafeEnabled)
     {
     	beeper.nack();
     }
-
+    else if( gpsHome.state < 2)
+    {
+    	if( (sec & 0xf) == 0) beeper.ack();
+    }
+    sec++;
 }
 
 

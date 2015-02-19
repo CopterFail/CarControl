@@ -19,6 +19,7 @@
 #define PIN_SERVO_STEER 21
 #define PIN_ESC_MOTOR   22
 
+#define PIN_BUTTON      14
 // Features requested
 //#define Magnetometer
 //#define BatteryMonitorCurrent

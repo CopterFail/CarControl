@@ -24,8 +24,9 @@ static int16_t TX_roll, TX_pitch, TX_throttle, TX_yaw, TX_AUX1, TX_AUX2, TX_AUX3
 static int16_t TX_AUX5, TX_AUX6, TX_AUX7, TX_AUX8, TX_AUX9, TX_AUX10, TX_AUX11, TX_AUX12;
 uint64_t AUX_chan_mask;
 
-void processPilotCommands()
+int16_t processPilotCommands( void )
 {
+	int16_t iVal, rVal=0;
     // read data into variables
     // Channel assignment variables are loaded from eeprom
     // allowing user to "dynamically" (via configurator) change the rx channel assignment
@@ -52,6 +53,18 @@ void processPilotCommands()
     icommandCam = TX_roll - TX_CENTER;
     icommandThrottle = TX_pitch - TX_CENTER;
     icommandParameter = TX_throttle - TX_CENTER;
-    icommandMode = TX_AUX1 / 630;
-    icommandAux = TX_AUX2 - TX_CENTER;
+
+    iVal = TX_AUX1 / 630;
+    if( icommandMode != iVal )
+    {
+    	icommandMode = iVal;
+    	rVal=1;
+    }
+    iVal = TX_AUX2 - TX_CENTER;
+    if( icommandAux != iVal )
+    {
+    	icommandAux = iVal;
+    	rVal=1;
+    }
+    return rVal;
 }    
