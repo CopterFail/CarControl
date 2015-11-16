@@ -9,7 +9,7 @@
 #include "model.h"
 #include "LED.h"
 
-#define LED_STATUS_COUNT	5
+#define LED_STATUS_COUNT	8
 #define LED_STATUS_MAX 		255
 
 // Blinking LED to indicate activity
@@ -34,7 +34,7 @@ uint8_t Beacon_LED_state = 0;
 
 Adafruit_NeoPixel strip = Adafruit_NeoPixel(LED_STATUS_COUNT, LED_STATUS, NEO_GRB + NEO_KHZ800);
 
-uint32_t LedStatus[5] = { RED, RED, RED, RED, RED };
+uint32_t LedStatus[LED_STATUS_COUNT] = { RED, RED, RED, RED, RED, RED, RED, RED };
 
 
 // Fill the dots one after the other with a color

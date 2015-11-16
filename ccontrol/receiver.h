@@ -8,7 +8,9 @@
 #ifndef RECEIVER_H_
 #define RECEIVER_H_
 
-#define SUMD_IS_ACTIVE
+//#define SUMD_IS_ACTIVE
+#define SBUS_IS_ACTIVE
+
 #define RX_CHANNELS 16
 //extern
 extern volatile uint16_t RX[RX_CHANNELS];

@@ -54,6 +54,7 @@ void Beeper::beep( uint8_t ui8beeps ) {
 }
 
 void Beeper::update( void ) {
+/*
 	if( cnt > 0 ){
 		cnt--;
 	}else{
@@ -70,4 +71,5 @@ void Beeper::update( void ) {
 			}
 		}
 	}
+*/
 }

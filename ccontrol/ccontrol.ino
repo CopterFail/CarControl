@@ -181,6 +181,9 @@ void process50HzTask()
 #ifdef SUMD_IS_ACTIVE  
     ReceiverReadPacket(); // dab 2014-02-01: non interrupt controlled receiver reading  
 #endif
+#ifdef SBUS_IS_ACTIVE
+    ReceiverReadPacket();
+#endif
 
     if( processPilotCommands() > 0 )
     {
@@ -285,6 +288,14 @@ void process1HzTask()
 {
 	static uint8_t  sec = 0;
     LED_1Hz();
+
+    Serial.print( "test: ");
+    for( int i=0; i<6 ; i++ )
+    {
+    	Serial.print( RX[i]);
+    	Serial.print( " ");
+    }
+    Serial.println( "" );
 
     if(failsafeEnabled)
     {

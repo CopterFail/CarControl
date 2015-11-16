@@ -15,8 +15,14 @@ volatile uint16_t RX[RX_CHANNELS] = {1000, 1000, 1000, 1000, 1000, 1000, 1000, 1
 
 #ifdef SUMD_IS_ACTIVE
 #include "Receiver_SUMD.h"
-#else
+#endif
+
+#ifdef SBUS_IS_ACTIVE
+#include "Receiver_SBUS.h"
+#endif
+
+//#else
 //#include "Receiver_teensy3_HW_PPM.h"
 //#include "Receiver_328p_HW_PPM.h"
-#endif
+//#endif
 

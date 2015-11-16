@@ -321,12 +321,17 @@ uint16_t build_GPS_message(struct hott_gps_message *msg)
 	dy = (gpsData.lat - gpsHome.lat) * 1113 / 100000;
 	dist = sqrt( dx * dx + dy * dy );
 
-	l2 = gpsHome.lat * M_PI / 180.0 / 10e7;
-	p2 = gpsHome.lon * M_PI / 180.0 / 10e7;
-	l1 = gpsData.lat * M_PI / 180.0 / 10e7;
-	p1 = gpsData.lon * M_PI / 180.0 / 10e7;
-    deg = acos(sin(p1)*sin(p2)+ cos(p1)*cos(p2)*cos(l2 - l1));
-    deg *= 180.0 / M_PI;
+	//l2 = gpsHome.lat * M_PI / 180.0 / 10e7;
+	//p2 = gpsHome.lon * M_PI / 180.0 / 10e7;
+	//l1 = gpsData.lat * M_PI / 180.0 / 10e7;
+	//p1 = gpsData.lon * M_PI / 180.0 / 10e7;
+    //deg = acos(sin(p1)*sin(p2)+ cos(p1)*cos(p2)*cos(l2 - l1));
+    //deg *= 180.0 / M_PI;
+
+    // math.h, #define TAN_89_99_DEGREES 5729.57795f
+    //cf:    *bearing = 9000.0f + atan2f(-dLat, dLon) * TAN_89_99_DEGREES;      // Convert the output radians to 100xdeg
+    deg = 90.0f + atan2f(dy, -dx) * 57.2957795f;
+
 
 	msg->distance = scale_float2uword(dist, 1, 0);
 	msg->home_direction = scale_float2uint8(deg, DEG_TO_UINT, 0);
