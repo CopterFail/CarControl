@@ -48,6 +48,9 @@
 #ifdef HOTT_TELEMETRIE
 #include "HottTelemetrie.h"
 #endif
+#ifdef SPORT_TELEMETRIE
+#include "SPortTelemetrie.h"
+#endif
 #include "Beeper.h"
 
 Servo servoSteer;
@@ -86,8 +89,10 @@ void setup() {
 
 
 #ifdef HOTT_TELEMETRIE
-    Serial3.begin(19200);
     i32HottTelemetrieInit();
+#endif
+#ifdef SPORT_TELEMETRIE
+    i32SPortTelemetrieInit();
 #endif
 
     beeper.attach( PIN_HORN );
@@ -122,6 +127,9 @@ void loop()
 
 #ifdef HOTT_TELEMETRIE
         SerialEventHoTT();  // this will be call too often...
+#endif
+#ifdef SPORT_TELEMETRIE
+        SerialEventSPort();  // this will be call too often...
 #endif
 
         sensorPreviousTime = currentTime;
@@ -192,12 +200,12 @@ void process50HzTask()
     updateModell_50Hz();
 
     // special car commands gyro(2) or acc(3) compensation:
-    if( icommandMode == 2) {
+    if( icommandModeSwitch == 2) {
       // primitive, but works:
       iAuxFactor = ( icommandParameter + 500 ) / 4;
       icommandSteer = icommandSteer - iAuxFactor * gyro[ZAXIS];
     }
-    else if( icommandMode >= 3) {
+    else if( icommandModeSwitch >= 3) {
 
     	// accel[YAXIS] left is positive m/s2
 
@@ -224,24 +232,20 @@ void process50HzTask()
     servoEsc.write( constrain( icommandThrottle + TX_CENTER, TX_CENTER-iThrottleLimit, TX_CENTER+iThrottleLimit ) );
     
     // horn has still no suitable trigger:
-    if ( icommandMode == 3 )
+    if ( icommandHornSwitch > 0 )
     {
         beeper.beep(5);
     }
 
-    if( icommandAux > -100 )
+    if( icommandLightSwitch )
     {
-    	if( icommandAux > 100 )
-    	{
-    		iAuxFactor = ( icommandParameter + 500 ) / 4;
-    		iCarLight = iAuxFactor;
-    		if( iCarLight < 10 )
-    		{
-    			iCarLight = 0;
-    		}
-    	}
-
-    }
+   		iAuxFactor = ( icommandLight + 500 ) / 4;
+   		iCarLight = iAuxFactor;
+   		if( iCarLight < 10 )
+   		{
+   			iCarLight = 0;
+   		}
+   	}
     else
     {
     	iCarLight = 0;
@@ -283,19 +287,25 @@ void process10HzTask() {
     LED_10Hz();
 }
 
-
+extern uint8_t ui8SbusStatus;
 void process1HzTask()
 {
 	static uint8_t  sec = 0;
     LED_1Hz();
 
+/**/
     Serial.print( "test: ");
-    for( int i=0; i<6 ; i++ )
+    for( int i=0; i<8 ; i++ )
     {
     	Serial.print( RX[i]);
     	Serial.print( " ");
     }
-    Serial.println( "" );
+    Serial.println( ui8SbusStatus );
+    if(failsafeEnabled)
+    	Serial.println( "Failsafe" );
+    else
+    	Serial.println( "OK" );
+/**/
 
     if(failsafeEnabled)
     {

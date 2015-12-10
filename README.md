@@ -5,8 +5,8 @@ Feature support:
 ----------------
 	- a gyro sensor to detect / correct z-axis rotation for drift stabilisation
 	- an acc sensor to detect forward/backward (LED control, x-axis) and check traction (y-axis)
-	- hott or ppm connection from rx
-	- telemetry to rx (hott)
+	- sbus, hott or ppm connection from rx
+	- telemetry to rx (hott or sport)
 	- RGB LED (ws2812b), color and intensity (Rear, break, back lights)
 	- switches for power LED
 	- 2 servo outputs for steering , camera

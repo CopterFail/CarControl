@@ -24,7 +24,8 @@
 //#define Magnetometer
 //#define BatteryMonitorCurrent
 #define GPS
-#define HOTT_TELEMETRIE
+//#define HOTT_TELEMETRIE
+#define SPORT_TELEMETRIE
 
 
 

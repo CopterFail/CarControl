@@ -138,6 +138,7 @@ void SerialEventHoTT( void )
 int32_t i32HottTelemetrieInit(void)
 {
 	// HoTT telemetry baudrate is fixed to 19200
+	SERIALHOTT.begin(19200);
 	//HoTTSettingsInitialize();
 
 	// allocate memory for telemetry data
@@ -552,7 +553,7 @@ void update_telemetrydata ()
 {
 	char *cbuffer1, *cbuffer2;
 
-    switch( icommandMode )
+    switch( icommandModeSwitch )
     {
     default:
     	cbuffer1 = "Manual";

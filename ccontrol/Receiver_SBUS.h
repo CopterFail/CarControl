@@ -14,6 +14,7 @@
 #define SBUS_START 0x0F
 #define SBUS_END 0x00
 #define SBUS_FRAME_SIZE 25  // (START 16Channelx11Bits Status Stop), https://developer.mbed.org/users/Digixx/notebook/futaba-s-bus-controlled-by-mbed/
+#define SBUS_STATUS_BYTE 23
 #define SBUS_FLAG_CHANNEL_17        (1 << 0)
 #define SBUS_FLAG_CHANNEL_18        (1 << 1)
 #define SBUS_FLAG_SIGNAL_LOSS       (1 << 2)
@@ -21,7 +22,7 @@
 
 static uint8_t sbusbytes[SBUS_FRAME_SIZE];
 uint16_t ui16RxCnt=0;
-uint16_t ui16FailCnt=0;
+uint8_t ui8SbusStatus=0;
 
 volatile uint16_t RX_failsafeStatus;
 volatile uint8_t RX_signalReceived = 0;
@@ -89,18 +90,19 @@ void ReceiverReadPacket( void )
     {
     	if( data != SBUS_END )
     	{
-    		ui16FailCnt++;
+    		RX_failsafeStatus = 1;
     	}
     	else
     	{
     		RX_failsafeStatus = 0;
     		SBus_UnrollChannels( &sbusbytes[1], &RX[0]);
             ui16RxCnt++;
-            if( sbusbytes[24] & SBUS_FLAG_FAILSAFE_ACTIVE )
+            ui8SbusStatus = sbusbytes[SBUS_STATUS_BYTE];
+            if( sbusbytes[SBUS_STATUS_BYTE] & SBUS_FLAG_FAILSAFE_ACTIVE )
             {
               RX_failsafeStatus = 1;
             }
-            if( sbusbytes[24] & SBUS_FLAG_SIGNAL_LOSS )
+            if( sbusbytes[SBUS_STATUS_BYTE] & SBUS_FLAG_SIGNAL_LOSS )
             {
               RX_failsafeStatus = 1;
             }

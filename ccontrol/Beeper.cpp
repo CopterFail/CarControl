@@ -10,6 +10,7 @@
 
 #include "Beeper.h"
 
+#define BEEPER_ACTIVE
 #define PAUSE 1
 #define PULS 2
 
@@ -54,7 +55,7 @@ void Beeper::beep( uint8_t ui8beeps ) {
 }
 
 void Beeper::update( void ) {
-/*
+#ifdef BEEPER_ACTIVE
 	if( cnt > 0 ){
 		cnt--;
 	}else{
@@ -71,5 +72,5 @@ void Beeper::update( void ) {
 			}
 		}
 	}
-*/
+#endif
 }
