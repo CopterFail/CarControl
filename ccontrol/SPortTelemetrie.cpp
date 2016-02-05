@@ -83,6 +83,17 @@ void FrSkySPort_ProcessSensorRequest(uint8_t sensorId)
   uint32_t temp=0;
   uint32_t temp2=0;
   uint8_t offset;
+
+/* Simulate GPS data for testing...
+  gpsData.state=3;
+  gpsData.lon=10000000*50;
+  gpsData.lat=10000000*5;
+  gpsData.course = 100000*123;
+  gpsData.speed = 100 * 10;
+  gpsData.height = 1000 * 50;
+  gpsData.accuracy= 5000;
+  gpsData.sats = 7;
+*/
   
   switch(sensorId)
   {

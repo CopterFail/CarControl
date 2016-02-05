@@ -69,6 +69,7 @@ void ReceiverReadPacket( void )
 
   uint8_t	    data;
   static uint8_t    state=0;
+  static unsigned long starttime=0;
 
   while (Serial1.available()) 
   {
@@ -79,6 +80,7 @@ void ReceiverReadPacket( void )
       if (data == SBUS_START)
       {
     	  sbusbytes[state++] = data;
+    	  starttime = millis();
       }
     }
     else
@@ -89,6 +91,10 @@ void ReceiverReadPacket( void )
     if(state >= SBUS_FRAME_SIZE )
     {
     	if( data != SBUS_END )
+    	{
+    		RX_failsafeStatus = 1;
+    	}
+    	else if( ( millis() - starttime ) > 3 )	// should take 2.5ms
     	{
     		RX_failsafeStatus = 1;
     	}
