@@ -29,6 +29,9 @@ volatile uint8_t RX_signalReceived = 0;
 
 bool failsafeEnabled = false;
 
+uint32_t u32SbusBadCnt=0;
+uint32_t u32SbusGoodCnt=0;
+
 // raw data: 8800 12000 15200
 
 // ISR
@@ -75,6 +78,11 @@ void ReceiverReadPacket( void )
   {
     data = Serial1.read();
 
+    if( ( millis() - starttime ) > 3 ) // should take 2.5ms
+    {
+    	state=0;
+    }
+
     if( 0 == state) 
     {
       if (data == SBUS_START)
@@ -93,11 +101,16 @@ void ReceiverReadPacket( void )
     	if( data != SBUS_END )
     	{
     		RX_failsafeStatus = 1;
+    		Serial.println( "SBus: SBUS_END" );
+
     	}
+    	/*
     	else if( ( millis() - starttime ) > 3 )	// should take 2.5ms
     	{
     		RX_failsafeStatus = 1;
+    		Serial.println( "SBus: Time" );
     	}
+    	*/
     	else
     	{
     		RX_failsafeStatus = 0;
@@ -107,20 +120,27 @@ void ReceiverReadPacket( void )
             if( sbusbytes[SBUS_STATUS_BYTE] & SBUS_FLAG_FAILSAFE_ACTIVE )
             {
               RX_failsafeStatus = 1;
+      		  Serial.println( "SBus: FS Bit" );
             }
             if( sbusbytes[SBUS_STATUS_BYTE] & SBUS_FLAG_SIGNAL_LOSS )
             {
-              RX_failsafeStatus = 1;
+              //RX_failsafeStatus = 1;
+      		  //Serial.println( "SBus: Signal lost" );
             }
-    	}
 
-    	for( state=0; state<16; state++ )
-    	{
-    	  RX[state] = (0.625f * RX[state]) + 880;
-    	  //Serial.print( RX[state] );
-    	  //Serial.print( " " );
+            for( state=0; state<16; state++ )
+    		{
+            	RX[state] = (0.625f * RX[state]) + 880;
+    		}
+    		if( RX_failsafeStatus == 0 )
+    		{
+    	    	u32SbusGoodCnt++;
+    		}
+    		else
+    		{
+    	    	u32SbusBadCnt++;
+    		}
     	}
-    	//Serial.println( sbusFrame.frame.flags );
     	state = 0;
     }
   }        

@@ -288,12 +288,16 @@ void process10HzTask() {
 }
 
 extern uint8_t ui8SbusStatus;
+extern uint32_t u32SbusBadCnt;
+extern uint32_t u32SbusGoodCnt;
+
+
 void process1HzTask()
 {
 	static uint8_t  sec = 0;
     LED_1Hz();
 
-/**/
+/*
     Serial.print( "test: ");
     for( int i=0; i<8 ; i++ )
     {
@@ -305,6 +309,13 @@ void process1HzTask()
     	Serial.println( "Failsafe" );
     else
     	Serial.println( "OK" );
+*/
+/**/
+    Serial.print( "sbus: ");
+    Serial.print( u32SbusGoodCnt );
+    Serial.print( " / ");
+    Serial.println( u32SbusBadCnt );
+
 /**/
 
     if(failsafeEnabled)
@@ -313,7 +324,7 @@ void process1HzTask()
     }
     else if( gpsHome.state < 2)
     {
-    	if( (sec & 0xf) == 0) beeper.ack();
+    	if( (sec & 0xf) == 0); // beeper.ack();
     }
     sec++;
 }

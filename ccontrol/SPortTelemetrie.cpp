@@ -213,7 +213,7 @@ void FrSkySPort_ProcessSensorRequest(uint8_t sensorId)
          // Note: This is sending Course Over Ground from GPS as Heading
          // before we were sending this: FrSkySPort_SendPackage(FR_ID_HEADING,ap_cog * 100); 
 
-        FrSkySPort_SendPackage(FR_ID_GPS_COURSE, gpsData.course * 100);   // 10000 = 100 deg
+        FrSkySPort_SendPackage(FR_ID_GPS_COURSE, gpsData.course / 1000 );   // 10000 = 100 deg
         break;
       }
       if(++nextGPS > 4)
@@ -227,7 +227,7 @@ void FrSkySPort_ProcessSensorRequest(uint8_t sensorId)
     //FrSkySPort_SendPackage(FR_ID_RPM,ap_throttle * 200+ap_battery_remaining*2);   //  * 2 if number of blades on Taranis is set to 2 + First 4 digits reserved for battery remaining in %
     break;
     // Since I don't know the app-id for these values, I just use these two "random"
-  #endif
+#endif
   case 0x45:
   case 0xC6:
     switch(nextDefault)
@@ -245,7 +245,11 @@ void FrSkySPort_ProcessSensorRequest(uint8_t sensorId)
       //FrSkySPort_SendPackage(FR_ID_ACCZ, fetchAccZ());
       break; 
     case 4:
-      FrSkySPort_SendPackage(FR_ID_T1,gpsData.state);
+      temp = gpsData.state+1;
+      if(gpsHome.state > 1 ) temp++;
+      temp *= 100;
+      temp += gpsData.sats;
+      FrSkySPort_SendPackage(FR_ID_T1,temp);
       break; 
     case 5:
       //FrSkySPort_SendPackage(FR_ID_A3_FIRST, handle_A2_A3_value((ap_roll_angle+180)/scalefactor));
